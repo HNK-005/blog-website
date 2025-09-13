@@ -12,11 +12,27 @@ module.exports = {
         '2xl': '1400px',
       },
     },
+    fontSize: {
+      sm: '12px',
+      base: '14px',
+      xl: '16px',
+      '2xl': '20px',
+      '3xl': '28px',
+      '4xl': '38px',
+      '5xl': '50px',
+    },
     extend: {
       fontFamily: {
         sans: ['Inter var', ...defaultTheme.fontFamily.sans],
+        gelasio: ['Gelasio', 'serif'],
       },
       colors: {
+        grey: '#F3F3F3',
+        'dark-grey': '#6B6B6B',
+        red: '#FF4E4E',
+        transparent: 'transparent',
+        twitter: '#1DA1F2',
+        purple: '#8B46FF',
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
