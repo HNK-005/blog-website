@@ -3,9 +3,7 @@ import { nanoid } from 'nanoid';
 
 const models = {
   //add models
-  user: {
-    id: primaryKey(nanoid),
-  }, // example
+  user: {}, // example
 };
 
 export const db = factory(models);
