@@ -1,0 +1,69 @@
+import { User } from 'src/modules/users/domain/user';
+import { UserSchemaClass } from '../entities/user.schema';
+import { Role } from 'src/modules/roles/domain/role';
+import { Status } from 'src/modules/statuses/domain/status';
+import { RoleSchema } from 'src/modules/roles/infrastructure/persistence/document/entities/role.schema';
+import { StatusSchema } from 'src/modules/statuses/infrastructure/persistence/document/entities/status.schema';
+
+export class UserMapper {
+  static toDomain(raw: UserSchemaClass): User {
+    const domainEntity = new User();
+    domainEntity.id = raw._id.toString();
+    domainEntity.email = raw.email;
+    domainEntity.password = raw.password;
+    domainEntity.provider = raw.provider;
+    domainEntity.socialId = raw.socialId;
+    domainEntity.fullName = raw.fullName;
+    domainEntity.photo = null;
+
+    if (raw.role) {
+      domainEntity.role = new Role();
+      domainEntity.role.id = raw.role._id;
+    }
+
+    if (raw.status) {
+      domainEntity.status = new Status();
+      domainEntity.status.id = raw.status._id;
+    }
+
+    domainEntity.createdAt = raw.createdAt;
+    domainEntity.updatedAt = raw.updatedAt;
+    domainEntity.deletedAt = raw.deletedAt;
+
+    return domainEntity;
+  }
+
+  static toPersistence(domainEntity: User): UserSchemaClass {
+    let role: RoleSchema | undefined = undefined;
+
+    if (domainEntity.role) {
+      role = new RoleSchema();
+      role._id = domainEntity.role.id;
+    }
+
+    let status: StatusSchema | undefined = undefined;
+
+    if (domainEntity.status) {
+      status = new StatusSchema();
+      status._id = domainEntity.status.id;
+    }
+
+    const persistenceSchema = new UserSchemaClass();
+    if (domainEntity.id && typeof domainEntity.id === 'string') {
+      persistenceSchema._id = domainEntity.id;
+    }
+    persistenceSchema.email = domainEntity.email;
+    persistenceSchema.password = domainEntity.password;
+    persistenceSchema.provider = domainEntity.provider;
+    persistenceSchema.socialId = domainEntity.socialId;
+    persistenceSchema.fullName = domainEntity.fullName;
+    persistenceSchema.photo = domainEntity.photo;
+    persistenceSchema.role = role;
+    persistenceSchema.status = status;
+    persistenceSchema.createdAt = domainEntity.createdAt;
+    persistenceSchema.updatedAt = domainEntity.updatedAt;
+    persistenceSchema.deletedAt = domainEntity.deletedAt;
+    
+    return persistenceSchema;
+  }
+}
