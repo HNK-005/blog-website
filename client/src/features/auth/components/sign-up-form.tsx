@@ -23,7 +23,7 @@ export const SignUpForm = () => {
               className="input-box"
               type="text"
               label="Full Name"
-              placeholder="Enter Full Name"
+              placeholder="Enter full name"
               error={formState.errors['fullName']}
               registration={register('fullName')}
             />
@@ -31,7 +31,7 @@ export const SignUpForm = () => {
               className="input-box"
               type="email"
               label="Email Address"
-              placeholder="Enter Email"
+              placeholder="Enter email"
               error={formState.errors['email']}
               registration={register('email')}
             />
@@ -39,7 +39,7 @@ export const SignUpForm = () => {
               className="input-box"
               type="password"
               label="Password"
-              placeholder="Enter Password"
+              placeholder="Enter password"
               error={formState.errors['password']}
               registration={register('password')}
             />
