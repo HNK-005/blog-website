@@ -33,12 +33,6 @@ export class UserSchemaClass extends EntityDocumentHelper {
 
   @Prop({
     type: String,
-    default: null,
-  })
-  socialId?: string | null;
-
-  @Prop({
-    type: String,
   })
   fullName: string | null;
 

@@ -12,7 +12,6 @@ export class UserMapper {
     domainEntity.email = raw.email;
     domainEntity.password = raw.password;
     domainEntity.provider = raw.provider;
-    domainEntity.socialId = raw.socialId;
     domainEntity.fullName = raw.fullName;
     domainEntity.photo = null;
 
@@ -55,7 +54,6 @@ export class UserMapper {
     persistenceSchema.email = domainEntity.email;
     persistenceSchema.password = domainEntity.password;
     persistenceSchema.provider = domainEntity.provider;
-    persistenceSchema.socialId = domainEntity.socialId;
     persistenceSchema.fullName = domainEntity.fullName;
     persistenceSchema.photo = domainEntity.photo;
     persistenceSchema.role = role;

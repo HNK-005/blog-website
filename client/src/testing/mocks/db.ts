@@ -1,11 +1,51 @@
 import { factory, primaryKey } from '@mswjs/data';
 import { nanoid } from 'nanoid';
 
+export type UserModel = {
+  _id: string;
+  email: string;
+  password: string;
+  provider: string;
+  fullName: string;
+  photo: string;
+  role: {
+    _id: number;
+  };
+  status: {
+    _id: number;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date;
+};
+
 const models = {
   //add models
   user: {
-    id: primaryKey(nanoid),
-  }, // example
+    _id: primaryKey(nanoid),
+    email: String,
+    password: String,
+    provider: String,
+    socialLink: {
+      youtube: String,
+      instagram: String,
+      facebook: String,
+      twitter: String,
+      github: String,
+      website: String,
+    },
+    fullName: String,
+    photo: String,
+    role: {
+      _id: Number,
+    },
+    status: {
+      _id: Number,
+    },
+    createAt: Date,
+    updateAt: Date,
+    deleteAt: Date,
+  },
 };
 
 export const db = factory(models);

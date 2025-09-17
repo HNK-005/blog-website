@@ -28,8 +28,6 @@ export class CreateUserDto {
 
   provider?: string;
 
-  socialId?: string | null;
-
   @ApiProperty({ example: 'John Doe', type: String })
   @IsNotEmpty()
   fullName: string | null;
