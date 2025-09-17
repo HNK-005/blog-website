@@ -3,14 +3,20 @@ import { Link } from 'react-router';
 
 import { Button } from '@/components/ui/button';
 import { Form, Input } from '@/components/ui/form';
-import { signUpInputSchema } from '@/lib/auth';
+import { signUpInputSchema, useRegister } from '@/lib/auth';
 
-export const SignUpForm = () => {
+type SignUpFormProps = {
+  onSuccess: () => void;
+};
+
+export const SignUpForm = ({ onSuccess }: SignUpFormProps) => {
+  const registering = useRegister({ onSuccess });
+
   return (
     <div>
       <Form
         onSubmit={(values) => {
-          console.log(values);
+          registering.mutate(values);
         }}
         schema={signUpInputSchema}
         options={{

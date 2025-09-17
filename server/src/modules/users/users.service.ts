@@ -96,7 +96,6 @@ export class UsersService {
       role: role,
       status: status,
       provider: createUserDto.provider ?? AuthProvidersEnum.email,
-      socialId: createUserDto.socialId,
     });
   }
 
