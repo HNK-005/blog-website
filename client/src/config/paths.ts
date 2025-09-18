@@ -7,5 +7,8 @@ export const paths = {
     signUp: {
       path: '/auth/sign-up',
     },
+    signIn: {
+      path: '/auth/sign-in',
+    },
   },
 } as const;

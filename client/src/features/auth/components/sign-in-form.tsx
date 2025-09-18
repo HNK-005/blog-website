@@ -3,37 +3,29 @@ import { Link } from 'react-router';
 
 import { Button } from '@/components/ui/button';
 import { Form, Input } from '@/components/ui/form';
-import { signUpInputSchema, useRegister } from '@/lib/auth';
+import { signInInputSchema, useLogin } from '@/lib/auth';
 import { paths } from '@/config/paths';
 
-type SignUpFormProps = {
+type SignInFormProps = {
   onSuccess: () => void;
 };
 
-export const SignUpForm = ({ onSuccess }: SignUpFormProps) => {
-  const registering = useRegister({ onSuccess });
+export const SignInForm = ({ onSuccess }: SignInFormProps) => {
+  const login = useLogin({ onSuccess });
 
   return (
     <div>
       <Form
         onSubmit={(values) => {
-          registering.mutate(values);
+          login.mutate(values);
         }}
-        schema={signUpInputSchema}
+        schema={signInInputSchema}
         options={{
           shouldUnregister: true,
         }}
       >
         {({ register, formState }) => (
           <>
-            <Input
-              className="input-box"
-              type="text"
-              label="Full Name"
-              placeholder="Enter full name"
-              error={formState.errors['fullName']}
-              registration={register('fullName')}
-            />
             <Input
               className="input-box"
               type="email"
@@ -53,7 +45,7 @@ export const SignUpForm = ({ onSuccess }: SignUpFormProps) => {
 
             <div>
               <Button type="submit" className="w-full">
-                Sign Up
+                Sign In
               </Button>
             </div>
           </>
@@ -65,12 +57,12 @@ export const SignUpForm = ({ onSuccess }: SignUpFormProps) => {
         <hr className="w-1/2 border-foreground" />
       </div>
       <p className="mt-6 space-x-2 text-center text-xl text-gray-600">
-        Already a member?
+        Don't have an account?
         <Link
-          to={paths.auth.signIn.path}
+          to={paths.auth.signUp.path}
           className="ml-1 text-xl text-foreground underline"
         >
-          Sign in here.
+          Join us today.
         </Link>
       </p>
     </div>
