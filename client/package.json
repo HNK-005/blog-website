@@ -14,8 +14,7 @@
     "check-types": "tsc --project tsconfig.json --pretty --noEmit",
     "generate": "plop",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build",
-    "run-mock-server": "vite-node mock-server.ts | pino-pretty -c"
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
