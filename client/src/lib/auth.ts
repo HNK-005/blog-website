@@ -14,6 +14,13 @@ export const signUpInputSchema = z.object({
 
 export type SignUpInput = z.infer<typeof signUpInputSchema>;
 
+export const signInInputSchema = z.object({
+  email: z.string().min(1, 'Required').email('Invalid email'),
+  password: z.string().min(5, 'Required'),
+});
+
+export type SignInInput = z.infer<typeof signInInputSchema>;
+
 const signUpWithEmailAndPassword = (data: SignUpInput): Promise<''> => {
   return api.post('/auth/email/register', data);
 };
@@ -34,4 +41,4 @@ const authConfig = {
   },
 };
 
-export const { useRegister, AuthLoader } = configureAuth(authConfig);
+export const { useRegister, useLogin, AuthLoader } = configureAuth(authConfig);
