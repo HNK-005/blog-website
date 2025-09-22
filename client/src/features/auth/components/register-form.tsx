@@ -10,13 +10,25 @@ import {
 } from '@mui/material';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import { Link as RouterLink } from 'react-router';
-import { paths } from '@/config/paths';
-import { registerInputSchema, type RegisterInput } from '@/lib/auth';
+import { Link as RouterLink, useSearchParams } from 'react-router';
+import {
+  registerInputSchema,
+  useRegister,
+  type RegisterInput,
+} from '@/lib/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useDisclosure } from '@/hook/use-disclosure';
 
-export const RegisterForm = () => {
+type RegisterFormProps = {
+  onSuccess: () => void;
+};
+
+export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
+  const registering = useRegister({ onSuccess });
+
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get('redirectTo');
+
   const {
     register,
     handleSubmit,
@@ -35,12 +47,11 @@ export const RegisterForm = () => {
     useDisclosure(false);
 
   const onSubmit: SubmitHandler<RegisterInput> = (data) => {
-    console.log('Register data:', data);
+    registering.mutate(data);
   };
 
   return (
     <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
-
       <Box display="flex" gap={2} mb={2}>
         <TextField
           fullWidth
@@ -102,7 +113,7 @@ export const RegisterForm = () => {
 
       <Typography variant="body2" align="center" sx={{ mt: 2 }}>
         Already a member?{' '}
-        <Link component={RouterLink} to={paths.app.home.getHref()}>
+        <Link component={RouterLink} to={redirectTo ?? ''}>
           Login
         </Link>
       </Typography>
