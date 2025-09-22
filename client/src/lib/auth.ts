@@ -35,4 +35,4 @@ const authConfig = {
   logoutFn: async () => null,
 };
 
-export const { useRegister, AuthLoader } = configureAuth(authConfig);
+export const { useRegister, AuthLoader} = configureAuth(authConfig);
