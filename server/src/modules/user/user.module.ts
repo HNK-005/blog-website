@@ -3,10 +3,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import {
   UserSchema,
   UserSchemaClass,
-} from './infrastructure/entities/user.shema';
-import { UserRepository } from './infrastructure/repositories/user.repository';
-import { UsersDocumentRepository } from './infrastructure/repositories/user.document.repository';
+} from './infrastructure/persistence/entities/user.shema';
 import { UsersService } from './users.service';
+import { PersistenceModule } from './infrastructure/persistence/persistence.module';
 
 @Module({
   imports: [
@@ -14,15 +13,10 @@ import { UsersService } from './users.service';
     MongooseModule.forFeature([
       { name: UserSchemaClass.name, schema: UserSchema },
     ]),
+    PersistenceModule,
   ],
   controllers: [],
-  providers: [
-    {
-      provide: UserRepository,
-      useClass: UsersDocumentRepository,
-    },
-    UsersService,
-  ],
+  providers: [UsersService],
   exports: [UsersService],
 })
 export class UsersModule {}

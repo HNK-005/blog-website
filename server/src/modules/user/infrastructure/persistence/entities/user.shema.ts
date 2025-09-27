@@ -49,12 +49,18 @@ export class UserSchemaClass extends EntityDocumentHelper {
   @Prop({
     type: RoleSchema,
   })
-  role?: RoleSchema;
+  role: RoleSchema;
 
   @Prop({
     type: StatusSchema,
   })
-  status?: StatusSchema;
+  status: StatusSchema;
+
+  @Prop({ type: Date })
+  createdAt: Date;
+
+  @Prop({ type: Date })
+  updatedAt: Date;
 
   @Prop({ type: Date })
   deletedAt?: Date;
