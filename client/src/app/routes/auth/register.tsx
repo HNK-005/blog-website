@@ -1,14 +1,18 @@
 import { AuthLayout } from '@/components/layouts';
 import { paths } from '@/config/paths';
 import { RegisterForm } from '@/features/auth/components/register-form';
+import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router';
 
 const RegisterRoot = () => {
   const navigate = useNavigate();
 
-  const handleSuccess = () => {
+  const handleSuccess = (email?: string) => {
+    if (!email) {
+      return toast.error('ERROR');
+    }
     navigate(paths.app.auth.verifyEmail.path, {
-      state: { email: 'abc@gmail.com' },
+      state: { email },
       replace: true,
     });
   };

@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { MuiOtpInput } from 'mui-one-time-password-input';
 import { Box, Button, Typography } from '@mui/material';
+import { useMutation } from '@tanstack/react-query';
+import { confirmEmail, type ConfirmInput } from '@/lib/auth';
 
 export function matchIsNumeric(text: string) {
   const isNumber = typeof text === 'number';
@@ -18,14 +20,23 @@ type ConfirmOtpForm = {
   onSucess: () => void;
 };
 
-const ConfirmOtpForm = ({ email, length }: ConfirmOtpForm) => {
+const ConfirmOtpForm = ({ email, length, onSucess }: ConfirmOtpForm) => {
   const [otp, setOtp] = React.useState('');
+
+  const confirm = useMutation({
+    mutationFn: async (data: ConfirmInput) => {
+      return await confirmEmail(data);
+    },
+    onSuccess: onSucess,
+  });
 
   const handleChange = (newValue: string) => {
     setOtp(newValue);
   };
 
-  const handleSubmit = () => {};
+  const handleSubmit = () => {
+    confirm.mutate({ email, otp });
+  };
 
   return (
     <Box>
@@ -43,7 +54,11 @@ const ConfirmOtpForm = ({ email, length }: ConfirmOtpForm) => {
           />
         </Box>
 
-        <Button variant="contained" onClick={handleSubmit}>
+        <Button
+          variant="contained"
+          onClick={handleSubmit}
+          loading={confirm.isPending}
+        >
           Confirm
         </Button>
       </Box>

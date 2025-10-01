@@ -20,9 +20,19 @@ export const registerInputSchema = z.object({
 });
 
 export type RegisterInput = z.infer<typeof registerInputSchema>;
+export type ConfirmInput = {
+  email: string;
+  otp: string;
+};
 
-const registerWithEmailAndPassword = (data: RegisterInput): Promise<any> => {
+const registerWithEmailAndPassword = (
+  data: RegisterInput,
+): Promise<{ email: string }> => {
   return api.post('/auth/email/register', data);
+};
+
+export const confirmEmail = (data: ConfirmInput): Promise<any> => {
+  return api.post('/auth/email/confirm', data);
 };
 
 const authConfig = {
@@ -35,4 +45,4 @@ const authConfig = {
   logoutFn: async () => null,
 };
 
-export const { useRegister, AuthLoader} = configureAuth(authConfig);
+export const { useRegister, AuthLoader } = configureAuth(authConfig);

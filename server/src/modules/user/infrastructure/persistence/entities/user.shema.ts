@@ -6,7 +6,7 @@ import { StatusSchema } from 'src/modules/status/infrastructure/entities/status.
 import { EntityDocumentHelper } from 'src/utils/document-entity-helper';
 
 @Schema({
-  collection: 'user',
+  collection: 'users',
   timestamps: true,
   toJSON: {
     virtuals: true,

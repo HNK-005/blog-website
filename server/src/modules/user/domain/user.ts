@@ -3,7 +3,7 @@ import { Role } from 'src/modules/role/domain/role';
 import { Status } from 'src/modules/status/domain/status';
 
 export class User {
-  id?: string;
+  id: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -14,7 +14,7 @@ export class User {
   provider: AuthProvidersEnum;
   role?: Role;
   status?: Status;
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
   deletedAt?: Date;
 }
