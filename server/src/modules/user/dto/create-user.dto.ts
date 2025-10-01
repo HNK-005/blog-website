@@ -30,9 +30,6 @@ export class CreateUserDto {
   @MinLength(6)
   password: string;
 
-  @ApiProperty({
-    example: AuthProvidersEnum.email,
-  })
   provider?: AuthProvidersEnum;
 
   @ApiProperty({ type: String })

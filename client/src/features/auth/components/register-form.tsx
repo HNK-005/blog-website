@@ -20,11 +20,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useDisclosure } from '@/hook/use-disclosure';
 
 type RegisterFormProps = {
-  onSuccess: () => void;
+  onSuccess: (email?: string) => void;
 };
 
 export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
-  const registering = useRegister({ onSuccess });
+  const registering = useRegister({
+    onSuccess: (data) => onSuccess(data?.email),
+  });
 
   const [searchParams] = useSearchParams();
   const redirectTo = searchParams.get('redirectTo');
@@ -107,7 +109,13 @@ export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
         />
       </Box>
 
-      <Button type="submit" fullWidth variant="contained" sx={{ mt: 2 }}>
+      <Button
+        type="submit"
+        fullWidth
+        variant="contained"
+        sx={{ mt: 2 }}
+        loading={registering.isPending}
+      >
         Register
       </Button>
 

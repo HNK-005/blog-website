@@ -13,6 +13,8 @@ import { StatusEnum } from '../status/status.enum';
 import { Role } from '../role/domain/role';
 import { Status } from '../status/domain/status';
 import { nanoid } from 'nanoid';
+import { NullableType } from 'src/utils/types/nullable.type';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -107,6 +109,102 @@ export class UsersService {
       role: role,
       status: status,
       provider: createUserDto.provider ?? AuthProvidersEnum.email,
+    });
+  }
+
+  async findByEmail(email: User['email']): Promise<NullableType<User>> {
+    return await this.usersRepository.findByEmail(email);
+  }
+
+  async update(
+    id: User['id'],
+    updateUserDto: UpdateUserDto,
+  ): Promise<User | null> {
+    // Do not remove comment below.
+    // <updating-property />
+
+    let password: string | undefined = undefined;
+
+    if (updateUserDto.password) {
+      const userObject = await this.usersRepository.findById(id);
+
+      if (userObject && userObject?.password !== updateUserDto.password) {
+        const salt = await bcrypt.genSalt();
+        password = await bcrypt.hash(updateUserDto.password, salt);
+      }
+    }
+
+    let email: string | undefined = undefined;
+
+    if (updateUserDto.email) {
+      const userObject = await this.usersRepository.findByEmail(
+        updateUserDto.email,
+      );
+
+      if (userObject && userObject.id !== id) {
+        throw new UnprocessableEntityException({
+          status: HttpStatus.UNPROCESSABLE_ENTITY,
+          message: 'Email already exists',
+          errors: {
+            email: 'emailAlreadyExists',
+          },
+        });
+      }
+
+      email = updateUserDto.email;
+    }
+
+    let role: Role | undefined = undefined;
+
+    if (updateUserDto.role?.id) {
+      const roleObject = Object.values(RoleEnum)
+        .map(String)
+        .includes(String(updateUserDto.role.id));
+      if (!roleObject) {
+        throw new UnprocessableEntityException({
+          status: HttpStatus.UNPROCESSABLE_ENTITY,
+          errors: {
+            role: 'roleNotExists',
+          },
+        });
+      }
+
+      role = {
+        id: updateUserDto.role.id,
+      };
+    }
+
+    let status: Status | undefined = undefined;
+
+    if (updateUserDto.status?.id) {
+      const statusObject = Object.values(StatusEnum)
+        .map(String)
+        .includes(String(updateUserDto.status.id));
+      if (!statusObject) {
+        throw new UnprocessableEntityException({
+          status: HttpStatus.UNPROCESSABLE_ENTITY,
+          errors: {
+            status: 'statusNotExists',
+          },
+        });
+      }
+
+      status = {
+        id: updateUserDto.status.id,
+      };
+    }
+
+    return this.usersRepository.update(id, {
+      // Do not remove comment below.
+      // <updating-property-payload />
+      firstName: updateUserDto.firstName,
+      lastName: updateUserDto.lastName,
+      email,
+      password,
+      avatar: updateUserDto.avatar,
+      role,
+      status,
+      provider: updateUserDto.provider,
     });
   }
 }

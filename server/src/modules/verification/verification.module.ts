@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { UsersService } from './users.service';
+import { VerificationService } from './verification.service';
 import { PersistenceModule } from './infrastructure/persistence/persistence.module';
 
 @Module({
@@ -8,7 +8,7 @@ import { PersistenceModule } from './infrastructure/persistence/persistence.modu
     PersistenceModule,
   ],
   controllers: [],
-  providers: [UsersService],
-  exports: [UsersService],
+  providers: [VerificationService],
+  exports: [VerificationService],
 })
-export class UserModule {}
+export class VerificationModule {}
