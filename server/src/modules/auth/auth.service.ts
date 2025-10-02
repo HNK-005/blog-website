@@ -39,13 +39,9 @@ export class AuthService {
     const otp = generateOtp();
     const expiresAt = generateDuration(5);
 
-    const salt = await bcrypt.genSalt();
-
-    const token = await bcrypt.hash(otp, salt);
-
     await this.verification.create({
       userId: id,
-      token,
+      token: otp,
       expiresAt,
     });
 

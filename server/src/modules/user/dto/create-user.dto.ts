@@ -53,10 +53,10 @@ export class CreateUserDto {
   @ApiPropertyOptional({ type: RoleDto })
   @IsOptional()
   @Type(() => RoleDto)
-  role: RoleDto;
+  role?: RoleDto;
 
   @ApiPropertyOptional({ type: StatusDto })
   @IsOptional()
   @Type(() => StatusDto)
-  status: StatusDto;
+  status?: StatusDto;
 }

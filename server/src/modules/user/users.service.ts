@@ -77,6 +77,7 @@ export class UsersService {
 
       role = {
         id: createUserDto.role.id,
+        name: RoleEnum[createUserDto.role.id],
       };
     }
 
@@ -96,6 +97,7 @@ export class UsersService {
 
       status = {
         id: createUserDto.status.id,
+        name: StatusEnum[createUserDto.status.id],
       };
     }
 
@@ -174,6 +176,7 @@ export class UsersService {
 
       role = {
         id: updateUserDto.role.id,
+        name: RoleEnum[updateUserDto.role.id],
       };
     }
 
@@ -195,6 +198,7 @@ export class UsersService {
 
       status = {
         id: updateUserDto.status.id,
+        name: StatusEnum[updateUserDto.status.id],
       };
     }
 
