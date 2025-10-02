@@ -68,6 +68,7 @@ export class UsersService {
       if (!roleObject) {
         throw new UnprocessableEntityException({
           status: HttpStatus.UNPROCESSABLE_ENTITY,
+          message: 'Role not exists',
           errors: {
             role: 'roleNotExists',
           },
@@ -86,6 +87,7 @@ export class UsersService {
       if (!statusObject) {
         throw new UnprocessableEntityException({
           status: HttpStatus.UNPROCESSABLE_ENTITY,
+          message: 'Status not exists',
           errors: {
             status: 'statusNotExists',
           },
@@ -163,6 +165,7 @@ export class UsersService {
       if (!roleObject) {
         throw new UnprocessableEntityException({
           status: HttpStatus.UNPROCESSABLE_ENTITY,
+          message: 'Role not exists',
           errors: {
             role: 'roleNotExists',
           },
@@ -183,6 +186,7 @@ export class UsersService {
       if (!statusObject) {
         throw new UnprocessableEntityException({
           status: HttpStatus.UNPROCESSABLE_ENTITY,
+          message: 'Status not exists',
           errors: {
             status: 'statusNotExists',
           },
