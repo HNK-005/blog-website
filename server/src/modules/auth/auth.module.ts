@@ -6,7 +6,12 @@ import { VerificationModule } from '../verification/verification.module';
 import { MailModule } from '../mail/mail.module';
 
 @Module({
-  imports: [UserModule, MailModule, VerificationModule],
+  imports: [
+    // import modules, etc.
+    UserModule,
+    MailModule,
+    VerificationModule,
+  ],
   controllers: [AuthController],
   providers: [AuthService],
   exports: [AuthService],

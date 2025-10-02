@@ -3,7 +3,10 @@ import { MailService } from './mail.service';
 import { MailerModule } from '../mailer/mailer.module';
 
 @Module({
-  imports: [MailerModule],
+  imports: [
+    // import modules, etc.
+    MailerModule,
+  ],
   providers: [MailService],
   exports: [MailService],
 })
