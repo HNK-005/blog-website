@@ -1,9 +1,9 @@
-import { RoleEnum } from 'src/modules/role/role.enum';
 import { User } from '../../../domain/user';
 import { UserSchemaClass } from '../entities/user.shema';
 import { Role } from 'src/modules/role/domain/role';
 import { Status } from 'src/modules/status/domain/status';
-import { StatusEnum } from 'src/modules/status/status.enum';
+import { RoleSchema } from 'src/modules/role/infrastructure/entities/role.schema';
+import { StatusSchema } from 'src/modules/status/infrastructure/entities/status.schema';
 
 export class UserMapper {
   static toDomain(raw: UserSchemaClass): User {
@@ -15,8 +15,15 @@ export class UserMapper {
     domainEntity.firstName = raw.firstName;
     domainEntity.lastName = raw.lastName;
     domainEntity.avatar = raw.avatar;
-    domainEntity.role = raw.role;
-    domainEntity.status = raw.status;
+    if (raw.role) {
+      domainEntity.role = new Role();
+      domainEntity.role.id = raw.role.id;
+    }
+
+    if (raw.status) {
+      domainEntity.status = new Status();
+      domainEntity.status.id = raw.status.id;
+    }
     domainEntity.createdAt = raw.createdAt;
     domainEntity.updatedAt = raw.updatedAt;
     domainEntity.deletedAt = raw.deletedAt;
@@ -27,24 +34,26 @@ export class UserMapper {
   static toPersistence(domainEntity: User): UserSchemaClass {
     const persistenceSchema = new UserSchemaClass();
 
-    //default role
-    let role = new Role();
-    role.id = RoleEnum.user;
+    let role: Role | undefined;
 
-    //default status
-    let status = new Status();
-    status.id = StatusEnum.inactive;
+    let status: Status | undefined;
 
     if (domainEntity.id) {
       persistenceSchema._id = domainEntity.id;
     }
 
     if (domainEntity.role) {
+      role = new RoleSchema();
       role.id = domainEntity.role.id;
+      role.name = domainEntity.role.name;
+      persistenceSchema.role = role;
     }
 
     if (domainEntity.status) {
+      status = new StatusSchema();
       status.id = domainEntity.status.id;
+      status.name = domainEntity.status.name;
+      persistenceSchema.status = status;
     }
 
     persistenceSchema.email = domainEntity.email;
@@ -54,8 +63,6 @@ export class UserMapper {
     persistenceSchema.firstName = domainEntity.firstName;
     persistenceSchema.lastName = domainEntity.lastName;
     persistenceSchema.avatar = domainEntity.avatar;
-    persistenceSchema.role = role;
-    persistenceSchema.status = status;
     persistenceSchema.deletedAt = domainEntity.deletedAt;
     return persistenceSchema;
   }

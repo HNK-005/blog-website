@@ -68,6 +68,7 @@ export class UsersService {
       if (!roleObject) {
         throw new UnprocessableEntityException({
           status: HttpStatus.UNPROCESSABLE_ENTITY,
+          message: 'Role not exists',
           errors: {
             role: 'roleNotExists',
           },
@@ -76,6 +77,7 @@ export class UsersService {
 
       role = {
         id: createUserDto.role.id,
+        name: RoleEnum[createUserDto.role.id],
       };
     }
 
@@ -86,6 +88,7 @@ export class UsersService {
       if (!statusObject) {
         throw new UnprocessableEntityException({
           status: HttpStatus.UNPROCESSABLE_ENTITY,
+          message: 'Status not exists',
           errors: {
             status: 'statusNotExists',
           },
@@ -94,6 +97,7 @@ export class UsersService {
 
       status = {
         id: createUserDto.status.id,
+        name: StatusEnum[createUserDto.status.id],
       };
     }
 
@@ -163,6 +167,7 @@ export class UsersService {
       if (!roleObject) {
         throw new UnprocessableEntityException({
           status: HttpStatus.UNPROCESSABLE_ENTITY,
+          message: 'Role not exists',
           errors: {
             role: 'roleNotExists',
           },
@@ -171,6 +176,7 @@ export class UsersService {
 
       role = {
         id: updateUserDto.role.id,
+        name: RoleEnum[updateUserDto.role.id],
       };
     }
 
@@ -183,6 +189,7 @@ export class UsersService {
       if (!statusObject) {
         throw new UnprocessableEntityException({
           status: HttpStatus.UNPROCESSABLE_ENTITY,
+          message: 'Status not exists',
           errors: {
             status: 'statusNotExists',
           },
@@ -191,6 +198,7 @@ export class UsersService {
 
       status = {
         id: updateUserDto.status.id,
+        name: StatusEnum[updateUserDto.status.id],
       };
     }
 

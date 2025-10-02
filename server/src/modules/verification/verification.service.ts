@@ -2,6 +2,7 @@ import { VerificationRepository } from './infrastructure/verification.repository
 import { Injectable } from '@nestjs/common';
 import { Verification } from './domain/verification';
 import { NullableType } from 'src/utils/types/nullable.type';
+import bcrypt from 'bcryptjs';
 
 @Injectable()
 export class VerificationService {
@@ -13,6 +14,13 @@ export class VerificationService {
   ): Promise<Verification> {
     // Do not remove comment below.
     // <creating-property />
+
+    const salt = await bcrypt.genSalt();
+
+    const hash = await bcrypt.hash(data.token, salt);
+
+    data.token = hash;
+
     return await this.verificationRepository.create(data);
   }
 
