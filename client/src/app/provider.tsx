@@ -5,8 +5,8 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { MainErrorFallback } from 'src/components/errors/main';
 import { queryConfig } from 'src/lib/react-query';
 import { Toaster } from 'react-hot-toast';
-import { AuthLoader } from '@/lib/auth';
-import LoadingPage from '@/components/loadings/loading-page';
+import { AuthLoader } from 'src/lib/auth';
+import LoadingPage from 'src/components/loadings/loading-page';
 
 export const AppProvider = ({ children }: React.PropsWithChildren) => {
   const [queryClient] = React.useState(

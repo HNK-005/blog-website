@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { MuiOtpInput } from 'mui-one-time-password-input';
 import { Box, Button, Typography } from '@mui/material';
 import { useMutation } from '@tanstack/react-query';
-import { confirmEmail, type ConfirmInput } from '@/lib/auth';
+import { confirmEmail, type ConfirmInput } from 'src/lib/auth';
 
 export function matchIsNumeric(text: string) {
   const isNumber = typeof text === 'number';

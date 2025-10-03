@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { Link as RouterLink } from 'react-router';
 import { Box, Container, Typography, Paper, Link } from '@mui/material';
-import logo from '@/assets/logo.svg';
-import { paths } from '@/config/paths';
+import logo from 'src/assets/logo.svg';
+import { paths } from 'src/config/paths';
 
 type AuthLayoutProps = {
   title: string;

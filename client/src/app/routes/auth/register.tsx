@@ -1,6 +1,6 @@
-import { AuthLayout } from '@/components/layouts';
-import { paths } from '@/config/paths';
-import { RegisterForm } from '@/features/auth/components/register-form';
+import { AuthLayout } from 'src/components/layouts';
+import { paths } from 'src/config/paths';
+import { RegisterForm } from 'src/features/auth/components/register-form';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router';
 

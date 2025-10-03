@@ -1,11 +1,6 @@
-import {
-  // decorators here
-  Transform,
-  Type,
-} from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  // decorators here
   IsEmail,
   IsNotEmpty,
   IsOptional,
@@ -17,8 +12,7 @@ import { StatusDto } from 'src/modules/status/dto/status.dto';
 import { lowerCaseTransformer } from 'src/utils/transformers/lower-case.transformer';
 import { AuthProvidersEnum } from 'src/modules/auth/auth-providers.enum';
 
-export const nameRegex = /^[A-Za-zÀ-Ỵà-ỹ]+(?:[ '-][A-Za-zÀ-Ỵà-ỹ]+)*$/;
-
+export const nameRegex = /^[A-Za-zÀ-ỹ]+(?:[ '-][A-Za-zÀ-ỹ]+)*$/;
 export class CreateUserDto {
   @ApiProperty({ example: 'test1@example.com', type: String })
   @Transform(lowerCaseTransformer)

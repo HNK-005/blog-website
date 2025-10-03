@@ -1,10 +1,10 @@
-import { AuthLayout } from '@/components/layouts';
-import ConfirmOtpForm from '@/features/auth/components/confirm-otp-form';
+import { AuthLayout } from 'src/components/layouts';
+import ConfirmOtpForm from 'src/features/auth/components/confirm-otp-form';
 import { useLocation, useNavigate } from 'react-router';
 import NotFoundRoute from '../not-found';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { paths } from '@/config/paths';
+import { paths } from 'src/config/paths';
 
 const VerifyEmailRoute = () => {
   const location = useLocation();
