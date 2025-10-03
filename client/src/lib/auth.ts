@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { api } from './api-client';
 import { configureAuth } from 'react-query-auth';
 
-export const nameRegex = /^[A-Za-zÀ-Ỵà-ỹ]+(?:[ '-][A-Za-zÀ-Ỵà-ỹ]+)*$/;
+export const nameRegex = /^[A-Za-zÀ-ỹ]+(?:[ '-][A-Za-zÀ-ỹ]+)*$/;
 
 export const registerInputSchema = z.object({
   firstName: z
