@@ -1,10 +1,10 @@
-import { paths } from '@/config/paths';
+import { paths } from 'src/config/paths';
 import { QueryClient, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { createBrowserRouter } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 import AppRoot from './routes/app/root';
-import LoadingPage from '@/components/loadings/loading-page';
+import LoadingPage from 'src/components/loadings/loading-page';
 
 const convert = (queryClient: QueryClient) => (m: any) => {
   const { clientLoader, clientAction, default: Component, ...rest } = m;

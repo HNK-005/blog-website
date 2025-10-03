@@ -1,8 +1,8 @@
 import { Box, Container, Typography, Link as MuiLink } from '@mui/material';
 import { Link } from 'react-router';
-import pageNotFoundImage from '@/assets/404.png';
-import fullLogo from '@/assets/full-logo.png';
-import { paths } from '@/config/paths';
+import pageNotFoundImage from 'src/assets/404.png';
+import fullLogo from 'src/assets/full-logo.png';
+import { paths } from 'src/config/paths';
 
 const NotFoundRoute = () => {
   return (

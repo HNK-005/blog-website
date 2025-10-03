@@ -1,6 +1,6 @@
 import Axios, { type InternalAxiosRequestConfig } from 'axios';
 import toast from 'react-hot-toast';
-import { env } from '@/config/env';
+import { env } from 'src/config/env';
 
 function authRequestInterceptor(config: InternalAxiosRequestConfig) {
   if (config.headers) {

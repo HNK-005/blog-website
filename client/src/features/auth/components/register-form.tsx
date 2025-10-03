@@ -15,9 +15,9 @@ import {
   registerInputSchema,
   useRegister,
   type RegisterInput,
-} from '@/lib/auth';
+} from 'src/lib/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useDisclosure } from '@/hook/use-disclosure';
+import { useDisclosure } from 'src/hook/use-disclosure';
 
 type RegisterFormProps = {
   onSuccess: (email?: string) => void;
