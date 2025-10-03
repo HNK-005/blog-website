@@ -14,9 +14,6 @@ export const paths = {
         getHref: (redirectTo?: string | null | undefined) =>
           `/auth/register${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ''}`,
       },
-      verifyEmail: {
-        path: '/auth/verify-email',
-      },
     },
   },
 } as const;
