@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import { Link as RouterLink, useSearchParams } from 'react-router';
+import { Link as RouterLink } from 'react-router';
 import {
   loginInputSchema,
   loginWithEmailAndPassword,
@@ -20,17 +20,26 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useDisclosure } from 'src/hook/use-disclosure';
 import { paths } from 'src/config/paths';
 import { useMutation } from '@tanstack/react-query';
+import type { AxiosError } from 'axios';
 
 type LoginFormProps = {
   onSuccess: () => void;
+  onError: (
+    error: AxiosError,
+    variables: {
+      email: string;
+      password: string;
+    },
+  ) => void;
 };
 
-export const LoginForm = ({ onSuccess }: LoginFormProps) => {
+export const LoginForm = ({ onSuccess, onError }: LoginFormProps) => {
   const login = useMutation({
     mutationFn: async (data: LoginInput) => {
       return await loginWithEmailAndPassword(data);
     },
     onSuccess,
+    onError,
   });
 
   const {

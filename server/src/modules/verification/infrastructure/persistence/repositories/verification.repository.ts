@@ -20,6 +20,32 @@ export class VerificationDocumentRepository implements VerificationRepository {
     const verificationObject = await createVerification.save();
     return VerificationMapper.toDomain(verificationObject);
   }
+  async update(
+    id: Verification['id'],
+    data: Partial<Omit<Verification, 'id' | 'createdAt' | 'updatedAt'>>,
+  ): Promise<Verification> {
+    const verificationObject = await this.verificationModel.findByIdAndUpdate(
+      id,
+      data,
+      { new: true },
+    );
+
+    if (!verificationObject) {
+      throw new Error('Verification not found');
+    }
+
+    return VerificationMapper.toDomain(verificationObject);
+  }
+
+  async findById(id: Verification['id']): Promise<NullableType<Verification>> {
+    if (!id) return null;
+
+    const verificationObject = await this.verificationModel.findById(id);
+
+    return verificationObject
+      ? VerificationMapper.toDomain(verificationObject)
+      : null;
+  }
 
   async findByUserId(
     userId: Verification['userId'],

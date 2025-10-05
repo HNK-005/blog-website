@@ -34,7 +34,7 @@ export type ConfirmInput = {
 
 export const registerWithEmailAndPassword = (
   data: RegisterInput,
-): Promise<{ email: string }> => {
+): Promise<any> => {
   return api.post('/auth/email/register', data);
 };
 
@@ -46,4 +46,8 @@ export const loginWithEmailAndPassword = (
 
 export const confirmEmail = (data: ConfirmInput): Promise<any> => {
   return api.post('/auth/email/confirm', data);
+};
+
+export const resendOtp = (data: { email: string }): Promise<any> => {
+  return api.post('/auth/email/new-otp', data);
 };

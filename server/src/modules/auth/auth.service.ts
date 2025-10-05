@@ -10,7 +10,6 @@ import { RoleEnum } from '../role/role.enum';
 import { StatusEnum } from '../status/status.enum';
 import { VerificationService } from '../verification/verification.service';
 import { AuthConfirmEmailDto } from './dto/auth-confirm-email.dto';
-import { RegisterResponseDto } from './dto/register-response.dto';
 import { MailService } from '../mail/mail.service';
 import { generateDuration, generateOtp } from 'src/utils/generate';
 import bcrypt from 'bcryptjs';
@@ -21,6 +20,7 @@ import { ConfigService } from '@nestjs/config/dist/config.service';
 import { AllConfigType } from 'src/config/config.type';
 import { JwtService } from '@nestjs/jwt/dist/jwt.service';
 import ms from 'ms';
+import { AuthSendOtpDto } from './dto/auth-resend-otp.dto';
 
 @Injectable()
 export class AuthService {
@@ -32,7 +32,7 @@ export class AuthService {
     private readonly configService: ConfigService<AllConfigType>,
   ) {}
 
-  async register(dto: AuthRegisterLoginDto): Promise<RegisterResponseDto> {
+  async register(dto: AuthRegisterLoginDto): Promise<void> {
     const user = await this.usersService.create({
       ...dto,
       email: dto.email,
@@ -63,10 +63,6 @@ export class AuthService {
     });
 
     await this.mail.registerEmail({ to: email, data: { otp, expiresAt } });
-
-    return {
-      email,
-    };
   }
 
   async login(dto: AuthEmailLoginDto): Promise<{
@@ -135,7 +131,42 @@ export class AuthService {
     };
   }
 
-  async comfirmEmailWithOtp(dto: AuthConfirmEmailDto) {
+  async resendOtp(dto: AuthSendOtpDto): Promise<void> {
+    const user = await this.usersService.findByEmail(dto.email);
+
+    if (
+      !user ||
+      user?.status?.id?.toString() !== StatusEnum.inactive.toString()
+    ) {
+      throw new NotFoundException();
+    }
+
+    const otp = generateOtp();
+    const expiresAt = generateDuration(
+      this.configService.getOrThrow('auth.confirmEmailExpires', {
+        infer: true,
+      }),
+    );
+
+    const verification = await this.verification.findByUserId(user.id);
+
+    if (verification) {
+      await this.verification.update(verification.id, {
+        token: otp,
+        expiresAt,
+      });
+    } else {
+      await this.verification.create({
+        userId: user.id,
+        token: otp,
+        expiresAt,
+      });
+    }
+
+    await this.mail.registerEmail({ to: user.email, data: { otp, expiresAt } });
+  }
+
+  async confirmEmailWithOtp(dto: AuthConfirmEmailDto) {
     const user = await this.usersService.findByEmail(dto.email);
 
     if (

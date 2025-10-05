@@ -21,6 +21,27 @@ export class VerificationService {
     return await this.verificationRepository.create(data);
   }
 
+  async update(
+    id: Verification['id'],
+    data: Partial<Omit<Verification, 'id' | 'createdAt' | 'updatedAt'>>,
+  ): Promise<Verification> {
+    if (data.token) {
+      const salt = await bcrypt.genSalt();
+
+      const hash = await bcrypt.hash(data.token, salt);
+
+      data.token = hash;
+    }
+
+    return await this.verificationRepository.update(id, data);
+  }
+
+  async findById(
+    id: Verification['id'],
+  ): Promise<NullableType<Verification>> {
+    return await this.verificationRepository.findById(id);
+  }
+
   async findByUserId(
     id: Verification['userId'],
   ): Promise<NullableType<Verification>> {

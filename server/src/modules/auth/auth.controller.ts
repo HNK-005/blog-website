@@ -11,9 +11,9 @@ import { AuthService } from './auth.service';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AuthRegisterLoginDto } from './dto/auth-register-login.dto';
 import { AuthConfirmEmailDto } from './dto/auth-confirm-email.dto';
-import { RegisterResponseDto } from './dto/register-response.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { AuthEmailLoginDto } from './dto/auth-email-login.dto';
+import { AuthSendOtpDto } from './dto/auth-resend-otp.dto';
 
 @ApiTags('Auth')
 @Controller({
@@ -24,13 +24,8 @@ export class AuthController {
   constructor(private readonly service: AuthService) {}
 
   @Post('email/register')
-  @HttpCode(HttpStatus.OK)
-  @ApiOkResponse({
-    type: () => RegisterResponseDto,
-  })
-  async register(
-    @Body() createUserDto: AuthRegisterLoginDto,
-  ): Promise<RegisterResponseDto> {
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async register(@Body() createUserDto: AuthRegisterLoginDto): Promise<void> {
     return this.service.register(createUserDto);
   }
 
@@ -62,11 +57,17 @@ export class AuthController {
     };
   }
 
+  @Post('email/new-otp')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async newOtp(@Body() sendOtpDto: AuthSendOtpDto): Promise<void> {
+    return this.service.resendOtp(sendOtpDto);
+  }
+
   @Post('email/confirm')
   @HttpCode(HttpStatus.OK)
   async confirmEmail(
     @Body() confirmEmailDto: AuthConfirmEmailDto,
   ): Promise<void> {
-    return this.service.comfirmEmailWithOtp(confirmEmailDto);
+    return this.service.confirmEmailWithOtp(confirmEmailDto);
   }
 }

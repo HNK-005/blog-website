@@ -10,5 +10,14 @@ export abstract class VerificationRepository {
     userId: Verification['userId'],
   ): Promise<NullableType<Verification>>;
 
+  abstract findById(
+    id: Verification['id'],
+  ): Promise<NullableType<Verification>>;
+
+  abstract update(
+    id: Verification['id'],
+    data: Partial<Omit<Verification, 'id' | 'createdAt' | 'updateAt'>>,
+  ): Promise<Verification>;
+
   abstract deleteById(id: Verification['id']): Promise<any>;
 }
