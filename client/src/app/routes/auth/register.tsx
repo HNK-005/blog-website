@@ -5,10 +5,16 @@ import { Dialog } from '@mui/material';
 import { useDisclosure } from 'src/hook/use-disclosure';
 import { useState } from 'react';
 import ConfirmOtpForm from 'src/features/auth/components/confirm-otp-form';
+import { useNavigate, useSearchParams } from 'react-router';
+import { paths } from 'src/config/paths';
 
 const RegisterRoot = () => {
   const { isOpen, open, close } = useDisclosure(false);
   const [email, setEmail] = useState('');
+  const [searchParams] = useSearchParams();
+
+  const redirectTo = searchParams.get('redirectTo');
+  const navigate = useNavigate();
 
   const handleRegisterSuccess = (email?: string) => {
     if (!email) {
@@ -20,7 +26,8 @@ const RegisterRoot = () => {
 
   const handleConfirmSuccess = () => {
     close();
-    //navigate login
+    toast.success('Confirm email completed, please login');
+    navigate(redirectTo || paths.app.auth.login.getHref());
   };
 
   return (

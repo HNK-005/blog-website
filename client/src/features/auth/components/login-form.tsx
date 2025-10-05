@@ -10,38 +10,36 @@ import {
 } from '@mui/material';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import { Link as RouterLink } from 'react-router';
+import { Link as RouterLink, useSearchParams } from 'react-router';
 import {
-  registerInputSchema,
-  registerWithEmailAndPassword,
-  type RegisterInput,
+  loginInputSchema,
+  loginWithEmailAndPassword,
+  type LoginInput,
 } from 'src/lib/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useDisclosure } from 'src/hook/use-disclosure';
 import { paths } from 'src/config/paths';
 import { useMutation } from '@tanstack/react-query';
 
-type RegisterFormProps = {
-  onSuccess: (email?: string) => void;
+type LoginFormProps = {
+  onSuccess: () => void;
 };
 
-export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
-  const registering = useMutation({
-    mutationFn: async (data: RegisterInput) => {
-      return await registerWithEmailAndPassword(data);
+export const LoginForm = ({ onSuccess }: LoginFormProps) => {
+  const login = useMutation({
+    mutationFn: async (data: LoginInput) => {
+      return await loginWithEmailAndPassword(data);
     },
-    onSuccess: (data) => onSuccess(data.email),
+    onSuccess,
   });
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<RegisterInput>({
-    resolver: zodResolver(registerInputSchema),
+  } = useForm<LoginInput>({
+    resolver: zodResolver(loginInputSchema),
     defaultValues: {
-      firstName: '',
-      lastName: '',
       email: '',
       password: '',
     },
@@ -50,30 +48,12 @@ export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
   const { isOpen: showPassword, toggle: toggleShowPassword } =
     useDisclosure(false);
 
-  const onSubmit: SubmitHandler<RegisterInput> = (data) => {
-    registering.mutate(data);
+  const onSubmit: SubmitHandler<LoginInput> = (data) => {
+    login.mutate(data);
   };
 
   return (
     <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
-      <Box display="flex" gap={2} mb={2}>
-        <TextField
-          fullWidth
-          label="First Name"
-          {...register('firstName')}
-          error={!!errors.firstName}
-          helperText={errors.firstName?.message}
-        />
-
-        <TextField
-          fullWidth
-          label="Last Name"
-          {...register('lastName')}
-          error={!!errors.lastName}
-          helperText={errors.lastName?.message}
-        />
-      </Box>
-
       <Box mb={2}>
         <TextField
           fullWidth
@@ -120,15 +100,15 @@ export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
         fullWidth
         variant="contained"
         sx={{ mt: 2 }}
-        loading={registering.isPending}
+        loading={login.isPending}
       >
-        Register
+        Login
       </Button>
 
       <Typography variant="body2" align="center" sx={{ mt: 2 }}>
-        Already a member?{' '}
-        <Link component={RouterLink} to={paths.app.auth.login.getHref()}>
-          Login
+        Don't have an account'?{' '}
+        <Link component={RouterLink} to={paths.app.auth.register.getHref()}>
+          Join us today
         </Link>
       </Typography>
     </Box>

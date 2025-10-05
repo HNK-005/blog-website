@@ -2,6 +2,8 @@
 // ideally, we want to keep these api related types in sync
 // with the backend instead of manually writing them out
 
+import type { AuthProvidersEnum, RoleEnum, StatusEnum } from 'src/config/enum';
+
 export type BaseEntity = {
   id: string;
   createdAt: number;
@@ -15,4 +17,30 @@ export type Meta = {
   page: number;
   total: number;
   totalPages: number;
+};
+
+export type User = Entity<{
+  firstName: string;
+  lastName: string;
+  email: string;
+  username: string;
+  password?: string;
+  bio?: string;
+  avatar?: string;
+  provider: AuthProvidersEnum;
+  role?: {
+    id: RoleEnum;
+    name: string;
+  };
+  status?: {
+    id: StatusEnum;
+    name: string;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt?: Date;
+}>;
+
+export type AuthResponse = {
+  user: User;
 };
