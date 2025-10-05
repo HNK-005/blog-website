@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { MuiOtpInput } from 'mui-one-time-password-input';
 import { Box, Button, Typography } from '@mui/material';
 import { useMutation } from '@tanstack/react-query';
-import { confirmEmail, type ConfirmInput } from 'src/lib/auth';
-import toast from 'react-hot-toast';
+import { confirmEmail, resendOtp, type ConfirmInput } from 'src/lib/auth';
 
 export function matchIsNumeric(text: string) {
   const isNumber = typeof text === 'number';
@@ -18,18 +17,31 @@ const validateChar = (value: string) => {
 type ConfirmOtpForm = {
   email: string;
   length?: number;
-  onSucess: () => void;
+  onSuccess: () => void;
 };
 
-const ConfirmOtpForm = ({ email, length = 6, onSucess }: ConfirmOtpForm) => {
+const ConfirmOtpForm = ({ email, length = 6, onSuccess }: ConfirmOtpForm) => {
   const [otp, setOtp] = React.useState('');
-  const [cooldown, setCooldown] = React.useState(60);
+  const secondCooldown = useRef(
+    Number(import.meta.env.VITE_COOLDOWN_RESEND_OTP) || 60,
+  );
+  const [cooldown, setCooldown] = React.useState(secondCooldown.current || 60);
+  const otpRef = useRef<HTMLDivElement>(null);
 
   const confirm = useMutation({
     mutationFn: async (data: ConfirmInput) => {
       return await confirmEmail(data);
     },
-    onSuccess: onSucess,
+    onSuccess: onSuccess,
+  });
+
+  const sendOtp = useMutation({
+    mutationFn: async (data: { email: string }) => {
+      return await resendOtp(data);
+    },
+    onSuccess: () => {
+      setCooldown(secondCooldown.current);
+    },
   });
 
   const handleChange = (newValue: string) => {
@@ -38,7 +50,12 @@ const ConfirmOtpForm = ({ email, length = 6, onSucess }: ConfirmOtpForm) => {
 
   const handleSubmit = () => {
     if (otp.length < length) {
-      return toast.error('OTP invalid!');
+      if (otpRef.current) {
+        const inputs = otpRef.current.querySelectorAll('input');
+        const unfocusedInput = Array.from(inputs).find((el) => el.value === ''); //Find element input has not value
+        unfocusedInput?.focus();
+        return;
+      }
     }
     confirm.mutate({ email, otp });
   };
@@ -60,10 +77,12 @@ const ConfirmOtpForm = ({ email, length = 6, onSucess }: ConfirmOtpForm) => {
 
         <Box display="flex" gap={1} justifyContent="center" mb={4}>
           <MuiOtpInput
+            ref={otpRef}
             length={length}
             value={otp}
             validateChar={validateChar}
             onChange={handleChange}
+            autoFocus
           />
         </Box>
 
@@ -75,7 +94,12 @@ const ConfirmOtpForm = ({ email, length = 6, onSucess }: ConfirmOtpForm) => {
           Confirm
         </Button>
         <Box mt={3}>
-          <Button variant="text" onClick={() => {}} disabled={cooldown > 0}>
+          <Button
+            variant="text"
+            onClick={() => sendOtp.mutate({ email })}
+            disabled={cooldown > 0}
+            loading={sendOtp.isPending}
+          >
             {cooldown > 0 ? `Resend OTP in ${cooldown}s` : 'Resend OTP'}
           </Button>
         </Box>

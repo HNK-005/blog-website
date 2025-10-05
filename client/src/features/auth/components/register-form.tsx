@@ -22,7 +22,15 @@ import { paths } from 'src/config/paths';
 import { useMutation } from '@tanstack/react-query';
 
 type RegisterFormProps = {
-  onSuccess: (email?: string) => void;
+  onSuccess: (
+    _data: any,
+    variables: {
+      firstName: string;
+      lastName: string;
+      email: string;
+      password: string;
+    },
+  ) => void;
 };
 
 export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
@@ -30,7 +38,7 @@ export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
     mutationFn: async (data: RegisterInput) => {
       return await registerWithEmailAndPassword(data);
     },
-    onSuccess: (data) => onSuccess(data.email),
+    onSuccess,
   });
 
   const {
