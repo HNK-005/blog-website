@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import { api } from './api-client';
-import { configureAuth } from 'react-query-auth';
 import type { AuthResponse } from 'src/types/api';
 
 export const nameRegex = /^[A-Za-zÀ-ỹ]+(?:[ '-][A-Za-zÀ-ỹ]+)*$/;
