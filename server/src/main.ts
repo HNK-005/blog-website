@@ -12,6 +12,7 @@ import { AppModule } from './app.module';
 import validationOptions from './utils/validation-options';
 import { AllConfigType } from 'src/config/config.type';
 import { ResolvePromisesInterceptor } from './utils/serializer.interceptor';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -22,6 +23,7 @@ async function bootstrap() {
     origin: [configService.getOrThrow('app.frontendDomain', { infer: true })],
     credentials: true,
   });
+  app.use(cookieParser());
   app.enableShutdownHooks();
   app.setGlobalPrefix(
     configService.getOrThrow('app.apiPrefix', { infer: true }),

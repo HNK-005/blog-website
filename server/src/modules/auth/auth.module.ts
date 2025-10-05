@@ -4,6 +4,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { VerificationModule } from '../verification/verification.module';
 import { MailModule } from '../mail/mail.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { MailModule } from '../mail/mail.module';
     UserModule,
     MailModule,
     VerificationModule,
+    JwtModule.register({}),
   ],
   controllers: [AuthController],
   providers: [AuthService],

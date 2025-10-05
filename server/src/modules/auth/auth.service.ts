@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { AuthRegisterLoginDto } from './dto/auth-register-login.dto';
 import { UsersService } from '../user/users.service';
@@ -13,6 +14,13 @@ import { RegisterResponseDto } from './dto/register-response.dto';
 import { MailService } from '../mail/mail.service';
 import { generateDuration, generateOtp } from 'src/utils/generate';
 import bcrypt from 'bcryptjs';
+import { AuthEmailLoginDto } from './dto/auth-email-login.dto';
+import { AuthProvidersEnum } from './auth-providers.enum';
+import { User } from '../user/domain/user';
+import { ConfigService } from '@nestjs/config/dist/config.service';
+import { AllConfigType } from 'src/config/config.type';
+import { JwtService } from '@nestjs/jwt/dist/jwt.service';
+import ms from 'ms';
 
 @Injectable()
 export class AuthService {
@@ -20,6 +28,8 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly verification: VerificationService,
     private readonly mail: MailService,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService<AllConfigType>,
   ) {}
 
   async register(dto: AuthRegisterLoginDto): Promise<RegisterResponseDto> {
@@ -36,8 +46,15 @@ export class AuthService {
 
     const { id, email } = user;
 
+    const otpExpiresIn = this.configService.getOrThrow(
+      'auth.confirmEmailExpires',
+      {
+        infer: true,
+      },
+    );
+
     const otp = generateOtp();
-    const expiresAt = generateDuration(5);
+    const expiresAt = generateDuration(otpExpiresIn);
 
     await this.verification.create({
       userId: id,
@@ -49,6 +66,72 @@ export class AuthService {
 
     return {
       email,
+    };
+  }
+
+  async login(dto: AuthEmailLoginDto): Promise<{
+    token: string;
+    refreshToken: string;
+    tokenExpires: number;
+    user: User;
+  }> {
+    const user = await this.usersService.findByEmail(dto.email);
+
+    if (!user) {
+      throw new UnprocessableEntityException({
+        message: 'User not found',
+        errors: {
+          email: 'notFound',
+        },
+      });
+    }
+
+    if (
+      !user.status ||
+      user.status?.id.toString() === StatusEnum.inactive.toString()
+    ) {
+      throw new UnprocessableEntityException({
+        message: 'User not active',
+        errors: {
+          email: 'notActive',
+        },
+      });
+    }
+
+    if (user.provider !== AuthProvidersEnum.email) {
+      throw new UnprocessableEntityException({
+        message: 'User registered via another provider',
+        errors: {
+          email: `needLoginViaProvider:${user.provider}`,
+        },
+      });
+    }
+
+    if (!user.password) {
+      throw new UnprocessableEntityException({
+        message: 'Password not set',
+        errors: {
+          password: 'notSet',
+        },
+      });
+    }
+
+    const comparePassword = await bcrypt.compare(dto.password, user.password);
+
+    if (!comparePassword) {
+      throw new BadRequestException('Password wrong');
+    }
+
+    const { token, refreshToken, tokenExpires } = await this.getTokensData({
+      id: user.id,
+      role: user.role,
+    });
+
+    return {
+      token,
+      refreshToken,
+      tokenExpires,
+      user,
     };
   }
 
@@ -85,5 +168,45 @@ export class AuthService {
     user.status.id = StatusEnum.active;
 
     await this.usersService.update(user.id, user);
+  }
+  private async getTokensData(data: { id: User['id']; role: User['role'] }) {
+    const tokenExpiresIn = this.configService.getOrThrow('auth.expires', {
+      infer: true,
+    });
+
+    const tokenExpires = Date.now() + ms(tokenExpiresIn);
+
+    const [token, refreshToken] = await Promise.all([
+      await this.jwtService.signAsync(
+        {
+          id: data.id,
+          role: data.role,
+        },
+        {
+          secret: this.configService.getOrThrow('auth.secret', { infer: true }),
+          expiresIn: tokenExpiresIn,
+        },
+      ),
+      await this.jwtService.signAsync(
+        {
+          id: data.id,
+          role: data.role,
+        },
+        {
+          secret: this.configService.getOrThrow('auth.refreshSecret', {
+            infer: true,
+          }),
+          expiresIn: this.configService.getOrThrow('auth.refreshExpires', {
+            infer: true,
+          }),
+        },
+      ),
+    ]);
+
+    return {
+      token,
+      refreshToken,
+      tokenExpires,
+    };
   }
 }

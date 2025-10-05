@@ -1,8 +1,14 @@
+import { useNavigate } from 'react-router';
 import { AuthLayout } from 'src/components/layouts';
+import { paths } from 'src/config/paths';
 import { LoginForm } from 'src/features/auth/components/login-form';
 
 const RegisterRoot = () => {
-  const handleLoginSuccess = () => {};
+  const navigate = useNavigate();
+
+  const handleLoginSuccess = () => {
+    navigate(paths.app.home.getHref());
+  };
 
   return (
     <AuthLayout title="Welcome Back">

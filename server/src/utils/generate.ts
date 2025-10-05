@@ -1,4 +1,5 @@
 import * as crypto from 'crypto';
+import ms, { StringValue } from 'ms';
 
 export function generateOtp(length = 6) {
   const otp = crypto
@@ -9,6 +10,7 @@ export function generateOtp(length = 6) {
   return otp;
 }
 
-export function generateDuration(minute = 1) {
-  return new Date(Date.now() + minute * 60 * 1000);
+export function generateDuration(duration: StringValue = '1m') {
+  const time = ms(duration);
+  return new Date(Date.now() + time);
 }

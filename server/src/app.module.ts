@@ -10,13 +10,14 @@ import { UserModule } from './modules/user/user.module';
 import { VerificationModule } from './modules/verification/verification.module';
 import { MailerModule } from './modules/mailer/mailer.module';
 import { MailModule } from './modules/mail/mail.module';
+import authConfig from './modules/auth/config/auth.config';
 
 @Module({
   imports: [
     MongooseModule.forRootAsync({ useClass: MongooseConfigService }),
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, databaseConfig, mailConfig],
+      load: [appConfig, databaseConfig, mailConfig, authConfig],
       envFilePath: ['.env'],
     }),
     AuthModule,
