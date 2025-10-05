@@ -2,7 +2,12 @@ import React, { useRef } from 'react';
 import { MuiOtpInput } from 'mui-one-time-password-input';
 import { Box, Button, Typography } from '@mui/material';
 import { useMutation } from '@tanstack/react-query';
-import { confirmEmail, resendOtp, type ConfirmInput } from 'src/lib/auth';
+import {
+  confirmEmail,
+  sendOtp,
+  type ConfirmInput,
+  type SendOtp,
+} from 'src/lib/auth';
 
 export function matchIsNumeric(text: string) {
   const isNumber = typeof text === 'number';
@@ -35,9 +40,9 @@ const ConfirmOtpForm = ({ email, length = 6, onSuccess }: ConfirmOtpForm) => {
     onSuccess: onSuccess,
   });
 
-  const sendOtp = useMutation({
-    mutationFn: async (data: { email: string }) => {
-      return await resendOtp(data);
+  const resendOtp = useMutation({
+    mutationFn: async (data: SendOtp) => {
+      return await sendOtp(data);
     },
     onSuccess: () => {
       setCooldown(secondCooldown.current);
@@ -60,7 +65,7 @@ const ConfirmOtpForm = ({ email, length = 6, onSuccess }: ConfirmOtpForm) => {
     confirm.mutate({ email, otp });
   };
 
-  // countdown timer cho cooldown
+  // countdown timer for cooldown
   React.useEffect(() => {
     if (cooldown > 0) {
       const timer = setInterval(() => setCooldown((c) => c - 1), 1000);
@@ -96,9 +101,9 @@ const ConfirmOtpForm = ({ email, length = 6, onSuccess }: ConfirmOtpForm) => {
         <Box mt={3}>
           <Button
             variant="text"
-            onClick={() => sendOtp.mutate({ email })}
+            onClick={() => resendOtp.mutate({ email })}
             disabled={cooldown > 0}
-            loading={sendOtp.isPending}
+            loading={resendOtp.isPending}
           >
             {cooldown > 0 ? `Resend OTP in ${cooldown}s` : 'Resend OTP'}
           </Button>

@@ -12,7 +12,7 @@ import ConfirmOtpForm from './confirm-otp-form';
 import { useDisclosure } from 'src/hook/use-disclosure';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useMutation } from '@tanstack/react-query';
-import { resendOtp } from 'src/lib/auth';
+import { sendOtp, type SendOtp } from 'src/lib/auth';
 
 const steps = ['Send OTP', 'Enter OTP', 'Done'];
 
@@ -24,9 +24,9 @@ type OtpStepperProps = {
 export const OtpStepper = ({ email, onSuccess }: OtpStepperProps) => {
   const [activeStep, setActiveStep] = React.useState(0);
   const { isOpen: disabled, close: complete } = useDisclosure(false);
-  const sendOtp = useMutation({
-    mutationFn: async (data: { email: string }) => {
-      return await resendOtp(data);
+  const sendEmailOtp = useMutation({
+    mutationFn: async (data: SendOtp) => {
+      return await sendOtp(data);
     },
     onSuccess: () => {
       setActiveStep(1);
@@ -37,7 +37,7 @@ export const OtpStepper = ({ email, onSuccess }: OtpStepperProps) => {
   const handleNext = () => {
     if (activeStep < 0 || activeStep >= steps.length) return;
     const action: Record<number, () => void> = {
-      0: () => sendOtp.mutate({ email }),
+      0: () => sendEmailOtp.mutate({ email }),
       1: () => {},
       2: () => {
         complete();
@@ -109,7 +109,7 @@ export const OtpStepper = ({ email, onSuccess }: OtpStepperProps) => {
         {activeStep !== 1 && (
           <Button
             onClick={handleNext}
-            loading={activeStep === 0 ? sendOtp.isPending : false}
+            loading={activeStep === 0 ? sendEmailOtp.isPending : false}
             disabled={disabled}
           >
             {(activeStep === 0 && 'Continue') ||

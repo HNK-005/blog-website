@@ -31,6 +31,7 @@ export type ConfirmInput = {
   email: string;
   otp: string;
 };
+export type SendOtp = Omit<ConfirmInput, 'otp'>;
 
 export const registerWithEmailAndPassword = (
   data: RegisterInput,
@@ -48,6 +49,6 @@ export const confirmEmail = (data: ConfirmInput): Promise<any> => {
   return api.post('/auth/email/confirm', data);
 };
 
-export const resendOtp = (data: { email: string }): Promise<any> => {
+export const sendOtp = (data: SendOtp): Promise<any> => {
   return api.post('/auth/email/new-otp', data);
 };

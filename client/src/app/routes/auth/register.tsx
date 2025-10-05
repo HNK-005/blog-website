@@ -35,7 +35,7 @@ const RegisterRoot = () => {
   const handleConfirmSuccess = () => {
     close();
     toast.success('Confirm email completed, please login');
-    navigate(redirectTo || paths.app.auth.login.getHref());
+    navigate(redirectTo || paths.app.auth.login.getHref(), { replace: true });
   };
 
   return (
