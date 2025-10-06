@@ -5,5 +5,5 @@ export class LoginResponseDto {
   @ApiProperty({
     type: () => User,
   })
-  user: User;
+  user: Omit<User, 'password'>;
 }

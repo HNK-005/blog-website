@@ -5,6 +5,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { MainErrorFallback } from 'src/components/errors/main';
 import { queryConfig } from 'src/lib/react-query';
 import { Toaster } from 'react-hot-toast';
+import { AuthProvider } from 'src/features/auth/context/auth-provider';
 
 export const AppProvider = ({ children }: React.PropsWithChildren) => {
   const [queryClient] = React.useState(
@@ -19,7 +20,7 @@ export const AppProvider = ({ children }: React.PropsWithChildren) => {
       <QueryClientProvider client={queryClient}>
         {import.meta.env.DEV && <ReactQueryDevtools />}
         <Toaster position="top-right" reverseOrder={false} />
-        {children}
+        <AuthProvider>{children}</AuthProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );

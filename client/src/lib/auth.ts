@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { api } from './api-client';
-import type { AuthResponse } from 'src/types/api';
+import type { AuthResponse, User } from 'src/types/api';
 
 export const nameRegex = /^[A-Za-zÀ-ỹ]+(?:[ '-][A-Za-zÀ-ỹ]+)*$/;
 
@@ -50,4 +50,8 @@ export const confirmEmail = (data: ConfirmInput): Promise<any> => {
 
 export const sendOtp = (data: SendOtp): Promise<any> => {
   return api.post('/auth/email/new-otp', data);
+};
+
+export const me = (): Promise<User> => {
+  return api.get('/auth/me');
 };

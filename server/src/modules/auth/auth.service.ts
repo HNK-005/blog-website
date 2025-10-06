@@ -21,6 +21,8 @@ import { AllConfigType } from 'src/config/config.type';
 import { JwtService } from '@nestjs/jwt/dist/jwt.service';
 import ms from 'ms';
 import { AuthSendOtpDto } from './dto/auth-resend-otp.dto';
+import { NullableType } from 'src/utils/types/nullable.type';
+import { JwtPayloadType } from './strategies/types/jwt-payload.type';
 
 @Injectable()
 export class AuthService {
@@ -200,6 +202,11 @@ export class AuthService {
 
     await this.usersService.update(user.id, user);
   }
+
+  async me(userJwtPayload: JwtPayloadType): Promise<NullableType<User>> {
+    return this.usersService.findById(userJwtPayload.id);
+  }
+
   private async getTokensData(data: { id: User['id']; role: User['role'] }) {
     const tokenExpiresIn = this.configService.getOrThrow('auth.expires', {
       infer: true,
