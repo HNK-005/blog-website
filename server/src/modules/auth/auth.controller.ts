@@ -1,19 +1,27 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Post,
+  Req,
   Res,
+  SerializeOptions,
+  UseGuards,
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { AuthService } from './auth.service';
-import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AuthRegisterLoginDto } from './dto/auth-register-login.dto';
 import { AuthConfirmEmailDto } from './dto/auth-confirm-email.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { AuthEmailLoginDto } from './dto/auth-email-login.dto';
 import { AuthSendOtpDto } from './dto/auth-resend-otp.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { User } from '../user/domain/user';
+import { NullableType } from 'src/utils/types/nullable.type';
+import { JwtAuthGuard } from './auth.guard';
 
 @ApiTags('Auth')
 @Controller({
@@ -69,5 +77,19 @@ export class AuthController {
     @Body() confirmEmailDto: AuthConfirmEmailDto,
   ): Promise<void> {
     return this.service.confirmEmailWithOtp(confirmEmailDto);
+  }
+
+  @ApiBearerAuth()
+  @SerializeOptions({
+    groups: ['me'],
+  })
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiOkResponse({
+    type: User,
+  })
+  @HttpCode(HttpStatus.OK)
+  public me(@Req() request): Promise<NullableType<User>> {
+    return this.service.me(request.user);
   }
 }

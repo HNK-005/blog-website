@@ -21,9 +21,10 @@ import { useDisclosure } from 'src/hook/use-disclosure';
 import { paths } from 'src/config/paths';
 import { useMutation } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
+import type { AuthResponse } from 'src/types/api';
 
 type LoginFormProps = {
-  onSuccess: () => void;
+  onSuccess: (data: AuthResponse) => void;
   onError: (
     error: AxiosError,
     variables: {

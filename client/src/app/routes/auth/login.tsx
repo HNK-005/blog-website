@@ -6,7 +6,9 @@ import { AuthLayout } from 'src/components/layouts';
 import { paths } from 'src/config/paths';
 import { LoginForm } from 'src/features/auth/components/login-form';
 import { OtpStepper } from 'src/features/auth/components/otp-stepper';
+import { useAuth } from 'src/features/auth/context/auth-provider';
 import { useDisclosure } from 'src/hook/use-disclosure';
+import type { AuthResponse } from 'src/types/api';
 
 const RegisterRoot = () => {
   const navigate = useNavigate();
@@ -14,10 +16,12 @@ const RegisterRoot = () => {
   const [email, setEmail] = React.useState('');
   const { isOpen, open, close } = useDisclosure(false);
   const [searchParams] = useSearchParams();
+  const { login } = useAuth();
 
   const redirectTo = searchParams.get('redirectTo');
-  const handleLoginSuccess = () => {
+  const handleLoginSuccess = (data: AuthResponse) => {
     close();
+    login(data.user);
     navigate(redirectTo || paths.app.home.getHref(), { replace: true });
   };
 
@@ -39,7 +43,7 @@ const RegisterRoot = () => {
     <AuthLayout title="Welcome Back">
       <LoginForm onSuccess={handleLoginSuccess} onError={handleLoginOnError} />
       <Dialog open={isOpen}>
-        <OtpStepper email={email} onSuccess={handleLoginSuccess} />
+        <OtpStepper email={email} onSuccess={close} />
       </Dialog>
     </AuthLayout>
   );

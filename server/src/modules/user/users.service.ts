@@ -120,6 +120,10 @@ export class UsersService {
     return await this.usersRepository.findByEmail(email);
   }
 
+  findById(id: User['id']): Promise<NullableType<User>> {
+    return this.usersRepository.findById(id);
+  }
+
   async update(
     id: User['id'],
     updateUserDto: UpdateUserDto,
