@@ -19,7 +19,7 @@ export const AppProvider = ({ children }: React.PropsWithChildren) => {
     <ErrorBoundary FallbackComponent={MainErrorFallback}>
       <QueryClientProvider client={queryClient}>
         {import.meta.env.DEV && <ReactQueryDevtools />}
-        <Toaster position="top-right" reverseOrder={false} />
+        <Toaster position="bottom-left" reverseOrder={false} />
         <AuthProvider>{children}</AuthProvider>
       </QueryClientProvider>
     </ErrorBoundary>

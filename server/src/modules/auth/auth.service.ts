@@ -70,7 +70,6 @@ export class AuthService {
   async login(dto: AuthEmailLoginDto): Promise<{
     token: string;
     refreshToken: string;
-    tokenExpires: number;
     user: User;
   }> {
     const user = await this.usersService.findByEmail(dto.email);
@@ -120,7 +119,7 @@ export class AuthService {
       throw new BadRequestException('Password wrong');
     }
 
-    const { token, refreshToken, tokenExpires } = await this.getTokensData({
+    const { token, refreshToken } = await this.getTokensData({
       id: user.id,
       role: user.role,
     });
@@ -128,7 +127,6 @@ export class AuthService {
     return {
       token,
       refreshToken,
-      tokenExpires,
       user,
     };
   }
@@ -207,12 +205,20 @@ export class AuthService {
     return this.usersService.findById(userJwtPayload.id);
   }
 
+  async refreshToken(
+    userJwtPayload: JwtPayloadType,
+  ): Promise<{ token: string }> {
+    const { id, role } = userJwtPayload;
+    const { token } = await this.getTokensData({ id, role });
+    return {
+      token,
+    };
+  }
+
   private async getTokensData(data: { id: User['id']; role: User['role'] }) {
     const tokenExpiresIn = this.configService.getOrThrow('auth.expires', {
       infer: true,
     });
-
-    const tokenExpires = Date.now() + ms(tokenExpiresIn);
 
     const [token, refreshToken] = await Promise.all([
       await this.jwtService.signAsync(
@@ -244,7 +250,6 @@ export class AuthService {
     return {
       token,
       refreshToken,
-      tokenExpires,
     };
   }
 }
