@@ -51,12 +51,7 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
   );
 
   React.useEffect(() => {
-    const savedUser = sessionStorage.getItem('user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    } else {
-      mutate();
-    }
+    mutate();
   }, []);
 
   if (isPending) {

@@ -10,7 +10,7 @@ import {
   SerializeOptions,
   UseGuards,
 } from '@nestjs/common';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AuthRegisterLoginDto } from './dto/auth-register-login.dto';
@@ -21,7 +21,6 @@ import { AuthSendOtpDto } from './dto/auth-resend-otp.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from '../user/domain/user';
 import { NullableType } from 'src/utils/types/nullable.type';
-import { JwtAuthGuard } from './auth.guard';
 
 @ApiTags('Auth')
 @Controller({
@@ -79,17 +78,31 @@ export class AuthController {
     return this.service.confirmEmailWithOtp(confirmEmailDto);
   }
 
-  @ApiBearerAuth()
+  @SerializeOptions({
+    groups: ['me'],
+  })
+  @Post('refresh')
+  @UseGuards(AuthGuard('jwt-refresh'))
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async refresh(@Req() req, @Res({ passthrough: true }) res): Promise<void> {
+    const { token } = await this.service.refreshToken(req.user);
+    res.cookie('accessToken', token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+    });
+  }
+
   @SerializeOptions({
     groups: ['me'],
   })
   @Get('me')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard('jwt'))
   @ApiOkResponse({
     type: User,
   })
   @HttpCode(HttpStatus.OK)
-  public me(@Req() request): Promise<NullableType<User>> {
-    return this.service.me(request.user);
+  public me(@Req() req): Promise<NullableType<User>> {
+    return this.service.me(req.user);
   }
 }

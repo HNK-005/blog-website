@@ -55,3 +55,7 @@ export const sendOtp = (data: SendOtp): Promise<any> => {
 export const me = (): Promise<User> => {
   return api.get('/auth/me');
 };
+
+export const refreshToken = (): Promise<any> => {
+  return api.post('/auth/refresh');
+};
