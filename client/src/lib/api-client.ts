@@ -4,6 +4,7 @@ import { env } from 'src/config/env';
 import { refreshToken } from './auth';
 
 let isRefreshing = false;
+let isRetry = false;
 let refreshSubscribers: (() => void)[] = [];
 
 const subscribeTokenRefresh = (cb: () => void) => {
@@ -34,19 +35,19 @@ api.interceptors.response.use(
     return response.data;
   },
   async (error) => {
-    const message = error.response?.data?.message || error.message;
     const originalRequest = error.config;
+    const message = error.response?.data?.message || error.message;
 
     if (error.response?.status !== 401) {
-      return toast.error(message);
+      toast.error(message);
+      return Promise.reject(error);
     }
 
-    if (error.response?.status !== 401 || isRefreshing) {
+    if (isRetry) {
       return Promise.reject(error);
     }
 
     if (isRefreshing) {
-      // Nếu đang refresh → đợi token mới
       return new Promise((resolve) => {
         subscribeTokenRefresh(() => {
           resolve(api(originalRequest));
@@ -55,6 +56,7 @@ api.interceptors.response.use(
     }
 
     isRefreshing = true;
+    isRetry = true;
 
     try {
       // Gọi API refresh token
@@ -71,6 +73,7 @@ api.interceptors.response.use(
       return Promise.reject(refreshError);
     } finally {
       isRefreshing = false;
+      isRetry = false;
     }
   },
 );
