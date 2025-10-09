@@ -11,13 +11,15 @@ import { VerificationModule } from './modules/verification/verification.module';
 import { MailerModule } from './modules/mailer/mailer.module';
 import { MailModule } from './modules/mail/mail.module';
 import authConfig from './modules/auth/config/auth.config';
+import fileConfig from './modules/file/config/file.config';
+import { FileModule } from './modules/file/file.module';
 
 @Module({
   imports: [
     MongooseModule.forRootAsync({ useClass: MongooseConfigService }),
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, databaseConfig, mailConfig, authConfig],
+      load: [appConfig, databaseConfig, mailConfig, authConfig, fileConfig],
       envFilePath: ['.env'],
     }),
     AuthModule,
@@ -25,6 +27,7 @@ import authConfig from './modules/auth/config/auth.config';
     VerificationModule,
     MailerModule,
     MailModule,
+    FileModule,
   ],
 })
 export class AppModule {}

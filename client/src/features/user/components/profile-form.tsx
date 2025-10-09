@@ -10,19 +10,24 @@ import {
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { useForm, Controller } from 'react-hook-form';
-import { profileSchema, type ProfileInput } from 'src/lib/user';
+import {
+  profileSchema,
+  updateProfile,
+  uploadAvatar,
+  type ProfileInput,
+} from 'src/lib/user';
 import { zodResolver } from '@hookform/resolvers/zod';
-import toast from 'react-hot-toast';
 import { useAuth } from 'src/features/auth/context/auth-provider';
+import { useMutation } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 
 export const ProfileForm = () => {
   const { user } = useAuth();
-
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<ProfileInput>({
+  const [preview, setPreview] = React.useState<string | undefined>(
+    user?.avatar?.path,
+  );
+  const submitButton = React.useRef<HTMLButtonElement>(null);
+  const { control, handleSubmit, setValue } = useForm<ProfileInput>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       username: user?.username,
@@ -30,32 +35,28 @@ export const ProfileForm = () => {
       lastName: user?.lastName,
       email: user?.email,
       bio: user?.bio,
+      avatar: user?.avatar,
     },
   });
 
-  const [preview, setPreview] = React.useState<string | undefined>();
+  const upload = useMutation({
+    mutationFn: async (data: FormData) => await uploadAvatar(data),
+    onSuccess: (data) => {
+      setPreview(data.file.path);
+      setValue('avatar', data.file);
+    },
+  });
+
+  const update = useMutation({
+    mutationFn: async (data: ProfileInput) => await updateProfile(data),
+    onSuccess: () => {
+      toast.success('Update profile successfully');
+    },
+  });
 
   const onSubmit = (data: ProfileInput) => {
-    console.log('Form data:', data);
-    alert('Cập nhật hồ sơ thành công ✅');
+    update.mutate(data);
   };
-
-  React.useEffect(() => {
-    if (errors.avatar) {
-      if (!errors.avatar.message) {
-        return;
-      }
-      toast.error(errors.avatar.message);
-    }
-  }, [errors.avatar]);
-
-  React.useEffect(() => {
-    return () => {
-      if (preview) {
-        URL.revokeObjectURL(preview);
-      }
-    };
-  }, [preview]);
 
   return (
     <Box
@@ -95,7 +96,7 @@ export const ProfileForm = () => {
             </Typography>
 
             <Avatar
-              src={preview || user?.avatar}
+              src={preview}
               sx={{
                 width: 120,
                 height: 120,
@@ -114,9 +115,14 @@ export const ProfileForm = () => {
             <Controller
               name="avatar"
               control={control}
-              render={({ field }) => (
-                <Button variant="contained" component="label" fullWidth>
-                  Upload new image
+              render={() => (
+                <Button
+                  variant="contained"
+                  component="label"
+                  fullWidth
+                  loading={upload.isPending}
+                >
+                  Upload new avatar
                   <input
                     type="file"
                     accept="image/*"
@@ -126,8 +132,10 @@ export const ProfileForm = () => {
                       if (!fileList || fileList.length === 0) return;
 
                       const file = fileList[0];
-                      field.onChange(fileList);
-                      setPreview(URL.createObjectURL(file));
+
+                      const formData = new FormData();
+                      formData.append(`file`, file);
+                      upload.mutate(formData);
                     }}
                   />
                 </Button>
@@ -187,7 +195,6 @@ export const ProfileForm = () => {
                 <Controller
                   name="lastName"
                   control={control}
-                  rules={{ required: 'Không được bỏ trống' }}
                   render={({ field, fieldState }) => (
                     <TextField
                       {...field}
@@ -234,9 +241,11 @@ export const ProfileForm = () => {
               {/* Submit */}
               <Box sx={{ mt: 2 }}>
                 <Button
+                  ref={submitButton}
                   type="submit"
                   variant="contained"
                   fullWidth
+                  loading={update.isPending}
                   sx={{
                     textTransform: 'none',
                     py: 1.2,

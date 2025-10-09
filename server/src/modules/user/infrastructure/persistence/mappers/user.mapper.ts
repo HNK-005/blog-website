@@ -1,9 +1,11 @@
 import { User } from '../../../domain/user';
-import { UserSchemaClass } from '../entities/user.shema';
+import { UserSchemaClass } from '../entities/user.schema';
 import { Role } from 'src/modules/role/domain/role';
 import { Status } from 'src/modules/status/domain/status';
 import { RoleSchema } from 'src/modules/role/infrastructure/entities/role.schema';
 import { StatusSchema } from 'src/modules/status/infrastructure/entities/status.schema';
+import { FileMapper } from 'src/modules/file/infrastructure/persistence/document/mappers/file.mapper';
+import { FileSchemaClass } from 'src/modules/file/infrastructure/persistence/document/entities/file.schema';
 
 export class UserMapper {
   static toDomain(raw: UserSchemaClass): User {
@@ -15,7 +17,14 @@ export class UserMapper {
     domainEntity.provider = raw.provider;
     domainEntity.firstName = raw.firstName;
     domainEntity.lastName = raw.lastName;
-    domainEntity.avatar = raw.avatar;
+    domainEntity.bio = raw.bio;
+
+    if (raw.avatar) {
+      domainEntity.avatar = FileMapper.toDomain(raw.avatar);
+    } else if (raw.avatar === null) {
+      domainEntity.avatar = null;
+    }
+
     if (raw.role) {
       domainEntity.role = new Role();
       domainEntity.role.id = raw.role.id;
@@ -25,6 +34,7 @@ export class UserMapper {
       domainEntity.status = new Status();
       domainEntity.status.id = raw.status.id;
     }
+
     domainEntity.createdAt = raw.createdAt;
     domainEntity.updatedAt = raw.updatedAt;
     domainEntity.deletedAt = raw.deletedAt;
@@ -57,13 +67,20 @@ export class UserMapper {
       persistenceSchema.status = status;
     }
 
+    if (domainEntity.avatar) {
+      const avatar = new FileSchemaClass();
+      avatar._id = domainEntity.avatar.id;
+      avatar.path = domainEntity.avatar.path;
+      persistenceSchema.avatar = avatar;
+    }
+
     persistenceSchema.email = domainEntity.email;
     persistenceSchema.password = domainEntity.password;
     persistenceSchema.provider = domainEntity.provider;
+    persistenceSchema.bio = domainEntity.bio;
     persistenceSchema.username = domainEntity.username;
     persistenceSchema.firstName = domainEntity.firstName;
     persistenceSchema.lastName = domainEntity.lastName;
-    persistenceSchema.avatar = domainEntity.avatar;
     persistenceSchema.deletedAt = domainEntity.deletedAt;
     return persistenceSchema;
   }

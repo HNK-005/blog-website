@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
-import { UserSchemaClass } from 'src/modules/user/infrastructure/persistence/entities/user.shema';
+import { UserSchemaClass } from 'src/modules/user/infrastructure/persistence/entities/user.schema';
 import { EntityDocumentHelper } from 'src/utils/document-entity-helper';
 
 @Schema({

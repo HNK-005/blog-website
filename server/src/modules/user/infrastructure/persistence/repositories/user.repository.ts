@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { NullableType } from 'src/utils/types/nullable.type';
 import { User } from '../../../domain/user';
 import { UserRepository } from '../../user.repository';
-import { UserSchemaClass } from '../entities/user.shema';
+import { UserSchemaClass } from '../entities/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { UserMapper } from '../mappers/user.mapper';

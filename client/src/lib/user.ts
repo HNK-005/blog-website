@@ -1,7 +1,5 @@
+import { api } from './api-client';
 import { z } from 'zod';
-
-const MAX_AVATAR_SIZE = 5 * 1024 * 1024;
-const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/jpg'];
 
 export const profileSchema = z.object({
   username: z
@@ -18,27 +16,22 @@ export const profileSchema = z.object({
   bio: z.string().max(300).optional().or(z.literal('')),
 
   avatar: z
-    .any()
-    .refine(
-      (fileList) => {
-        if (
-          !fileList ||
-          !(fileList instanceof FileList) ||
-          fileList.length === 0
-        ) {
-          return true;
-        }
-
-        const file = fileList[0];
-        return (
-          file.size <= MAX_AVATAR_SIZE &&
-          ACCEPTED_IMAGE_TYPES.includes(file.type)
-        );
-      },
-      { message: 'Avatar must be a JPG or PNG image under 5MB' },
-    )
-    .transform((v) => (v instanceof FileList && v.length > 0 ? v : undefined))
-    .optional(),
+    .object({
+      id: z.string().optional(),
+      path: z.string().optional(),
+    })
+    .optional()
+    .nullable(),
 });
 
 export type ProfileInput = z.infer<typeof profileSchema>;
+
+export const uploadAvatar = (
+  formData: FormData,
+): Promise<{ file: { _id: string; path: string } }> => {
+  return api.post('/files/upload', formData);
+};
+
+export const updateProfile = (data: ProfileInput): Promise<any> => {
+  return api.patch('/auth/me', data);
+};

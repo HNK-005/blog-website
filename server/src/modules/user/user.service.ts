@@ -15,10 +15,15 @@ import { Status } from '../status/domain/status';
 import { nanoid } from 'nanoid';
 import { NullableType } from 'src/utils/types/nullable.type';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { FileType } from '../file/domain/file';
+import { FileService } from '../file/file.service';
 
 @Injectable()
-export class UsersService {
-  constructor(private readonly usersRepository: UserRepository) {}
+export class UserService {
+  constructor(
+    private readonly usersRepository: UserRepository,
+    private readonly filesService: FileService,
+  ) {}
 
   async generateUsername(email: string): Promise<string> {
     let username = email.split('@')[0];
@@ -40,6 +45,7 @@ export class UsersService {
     let password: string | undefined = undefined;
     let role: Role | undefined = undefined;
     let status: Status | undefined = undefined;
+    let avatar: FileType | null | undefined = undefined;
     const email = createUserDto.email;
     const username = await this.generateUsername(email);
 
@@ -79,6 +85,23 @@ export class UsersService {
         id: createUserDto.role.id,
         name: RoleEnum[createUserDto.role.id],
       };
+    }
+
+    if (createUserDto.avatar?.id) {
+      const fileObject = await this.filesService.findById(
+        createUserDto.avatar.id,
+      );
+      if (!fileObject) {
+        throw new UnprocessableEntityException({
+          status: HttpStatus.UNPROCESSABLE_ENTITY,
+          errors: {
+            avatar: 'imageNotExists',
+          },
+        });
+      }
+      avatar = fileObject;
+    } else if (createUserDto.avatar === null) {
+      avatar = null;
     }
 
     if (createUserDto.status?.id) {
@@ -132,6 +155,10 @@ export class UsersService {
     // <updating-property />
 
     let password: string | undefined = undefined;
+    let email: string | undefined = undefined;
+    let role: Role | undefined = undefined;
+    let status: Status | undefined = undefined;
+    let avatar: FileType | null | undefined = undefined;
 
     if (updateUserDto.password) {
       const userObject = await this.usersRepository.findById(id);
@@ -141,8 +168,6 @@ export class UsersService {
         password = await bcrypt.hash(updateUserDto.password, salt);
       }
     }
-
-    let email: string | undefined = undefined;
 
     if (updateUserDto.email) {
       const userObject = await this.usersRepository.findByEmail(
@@ -162,7 +187,22 @@ export class UsersService {
       email = updateUserDto.email;
     }
 
-    let role: Role | undefined = undefined;
+    if (updateUserDto.avatar?.id) {
+      const fileObject = await this.filesService.findById(
+        updateUserDto.avatar.id,
+      );
+      if (!fileObject) {
+        throw new UnprocessableEntityException({
+          status: HttpStatus.UNPROCESSABLE_ENTITY,
+          errors: {
+            avatar: 'imageNotExists',
+          },
+        });
+      }
+      avatar = fileObject;
+    } else if (updateUserDto.avatar === null) {
+      avatar = null;
+    }
 
     if (updateUserDto.role?.id) {
       const roleObject = Object.values(RoleEnum)
@@ -183,8 +223,6 @@ export class UsersService {
         name: RoleEnum[updateUserDto.role.id],
       };
     }
-
-    let status: Status | undefined = undefined;
 
     if (updateUserDto.status?.id) {
       const statusObject = Object.values(StatusEnum)
@@ -213,7 +251,8 @@ export class UsersService {
       lastName: updateUserDto.lastName,
       email,
       password,
-      avatar: updateUserDto.avatar,
+      bio: updateUserDto.bio,
+      avatar,
       role,
       status,
       provider: updateUserDto.provider,
