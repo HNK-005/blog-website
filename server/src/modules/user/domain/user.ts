@@ -1,4 +1,5 @@
 import { AuthProvidersEnum } from 'src/modules/auth/auth-providers.enum';
+import { FileType } from 'src/modules/file/domain/file';
 import { Role } from 'src/modules/role/domain/role';
 import { Status } from 'src/modules/status/domain/status';
 
@@ -10,7 +11,7 @@ export class User {
   username: string;
   password?: string;
   bio?: string;
-  avatar?: string;
+  avatar?: FileType | null;
   provider: AuthProvidersEnum;
   role?: Role;
   status?: Status;

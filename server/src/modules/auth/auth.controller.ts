@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Patch,
   Post,
   Req,
   Res,
@@ -21,6 +22,7 @@ import { AuthSendOtpDto } from './dto/auth-resend-otp.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from '../user/domain/user';
 import { NullableType } from 'src/utils/types/nullable.type';
+import { AuthUpdateDto } from './dto/auth-update.dto';
 
 @ApiTags('Auth')
 @Controller({
@@ -104,5 +106,22 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   public me(@Req() req): Promise<NullableType<User>> {
     return this.service.me(req.user);
+  }
+
+  @ApiBearerAuth()
+  @SerializeOptions({
+    groups: ['me'],
+  })
+  @Patch('me')
+  @UseGuards(AuthGuard('jwt'))
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: User,
+  })
+  public update(
+    @Req() req,
+    @Body() userDto: AuthUpdateDto,
+  ): Promise<NullableType<User>> {
+    return this.service.update(req.user, userDto);
   }
 }

@@ -26,7 +26,7 @@ export type User = Entity<{
   username: string;
   password?: string;
   bio?: string;
-  avatar?: string;
+  avatar?: FileResponse;
   provider: AuthProvidersEnum;
   role?: {
     id: RoleEnum;
@@ -43,4 +43,9 @@ export type User = Entity<{
 
 export type AuthResponse = {
   user: User;
+};
+
+export type FileResponse = {
+  id: string;
+  path: string;
 };

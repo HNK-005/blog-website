@@ -11,6 +11,7 @@ import { RoleDto } from 'src/modules/role/dto/role.dto';
 import { StatusDto } from 'src/modules/status/dto/status.dto';
 import { lowerCaseTransformer } from 'src/utils/transformers/lower-case.transformer';
 import { AuthProvidersEnum } from 'src/modules/auth/auth-providers.enum';
+import { FileDto } from 'src/modules/file/dto/file.dto';
 
 export const nameRegex = /^[A-Za-zÀ-ỹ]+(?:[ '-][A-Za-zÀ-ỹ]+)*$/;
 export class CreateUserDto {
@@ -28,7 +29,7 @@ export class CreateUserDto {
 
   @ApiProperty({ type: String })
   @IsNotEmpty()
-  usename?: string;
+  username?: string;
 
   @ApiProperty({ example: 'John', type: String })
   @Matches(nameRegex)
@@ -40,9 +41,9 @@ export class CreateUserDto {
   @IsNotEmpty()
   lastName: string;
 
-  @ApiPropertyOptional({ type: String })
+  @ApiPropertyOptional({ type: () => FileDto })
   @IsOptional()
-  avatar?: string;
+  avatar?: FileDto | null;
 
   @ApiPropertyOptional({ type: RoleDto })
   @IsOptional()

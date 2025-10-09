@@ -13,12 +13,15 @@ import validationOptions from './utils/validation-options';
 import { AllConfigType } from 'src/config/config.type';
 import { ResolvePromisesInterceptor } from './utils/serializer.interceptor';
 import cookieParser from 'cookie-parser';
+import { urlencoded, json } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
   const configService = app.get(ConfigService<AllConfigType>);
 
+  app.use(json({ limit: '5mb' }));
+  app.use(urlencoded({ extended: true, limit: '5mb' }));
   app.enableCors({
     origin: [configService.getOrThrow('app.frontendDomain', { infer: true })],
     credentials: true,
