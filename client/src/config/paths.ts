@@ -20,5 +20,12 @@ export const paths = {
           `/auth/login${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ''}`,
       },
     },
+    user: {
+      profile: {
+        path: '/user/profile',
+        getHref: (redirectTo?: string | null | undefined) =>
+          `/user/profile${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ''}`,
+      },
+    },
   },
 } as const;
