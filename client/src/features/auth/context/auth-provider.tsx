@@ -2,12 +2,7 @@ import * as React from 'react';
 import { useMutation } from '@tanstack/react-query';
 import LoadingPage from 'src/components/loadings/loading-page';
 import { me } from 'src/lib/auth';
-
-type User = {
-  id: string;
-  email: string;
-  name?: string;
-};
+import type { User } from 'src/types/api';
 
 type AuthContextType = {
   user: User | null;
