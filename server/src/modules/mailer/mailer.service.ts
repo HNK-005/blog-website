@@ -4,6 +4,8 @@ import { ConfigService } from '@nestjs/config';
 import nodemailer from 'nodemailer';
 import Handlebars from 'handlebars';
 import { AllConfigType } from 'src/config/config.type';
+import hbs from 'nodemailer-express-handlebars';
+import path from 'path';
 
 @Injectable()
 export class MailerService {
@@ -20,6 +22,18 @@ export class MailerService {
         pass: configService.get('mail.password', { infer: true }),
       },
     });
+
+    this.transporter.use(
+      'compile',
+      hbs({
+        viewEngine: {
+          extname: '.hbs',
+          defaultLayout: false,
+        },
+        viewPath: path.resolve('src/modules/mail/mail-templates'),
+        extName: '.hbs',
+      }),
+    );
   }
 
   async sendMail({
@@ -31,23 +45,25 @@ export class MailerService {
     context: Record<string, unknown>;
   }): Promise<void> {
     let html: string | undefined;
+
     if (templatePath) {
-      const template = await fs.readFile(templatePath, 'utf-8');
-      html = Handlebars.compile(template, {
-        strict: true,
-      })(context);
+      const absolutePath = templatePath.endsWith('.hbs')
+        ? path.resolve('src/modules/mail/mail-templates', templatePath)
+        : path.resolve(
+            'src/modules/mail/mail-templates',
+            `${templatePath}.hbs`,
+          );
+
+      const template = await fs.readFile(absolutePath, 'utf-8');
+      html = Handlebars.compile(template, { strict: true })(context);
     }
 
     await this.transporter.sendMail({
       ...mailOptions,
-      from: mailOptions.from
-        ? mailOptions.from
-        : `"${this.configService.get('mail.defaultName', {
-            infer: true,
-          })}" <${this.configService.get('mail.defaultEmail', {
-            infer: true,
-          })}>`,
-      html: mailOptions.html ? mailOptions.html : html,
+      from:
+        mailOptions.from ??
+        `"${this.configService.get('mail.defaultName', { infer: true })}" <${this.configService.get('mail.defaultEmail', { infer: true })}>`,
+      html: mailOptions.html ?? html,
     });
   }
 }

@@ -33,7 +33,6 @@ export const OtpStepper = ({ email, onSuccess }: OtpStepperProps) => {
     },
   });
 
-  // Step handlers
   const handleNext = () => {
     if (activeStep < 0 || activeStep >= steps.length) return;
     const action: Record<number, () => void> = {
@@ -47,7 +46,6 @@ export const OtpStepper = ({ email, onSuccess }: OtpStepperProps) => {
     action[activeStep]();
   };
 
-  // Render form each one step
   const renderStepContent = (step: number) => {
     switch (step) {
       case 0:

@@ -27,10 +27,10 @@ type ConfirmOtpForm = {
 
 const ConfirmOtpForm = ({ email, length = 6, onSuccess }: ConfirmOtpForm) => {
   const [otp, setOtp] = React.useState('');
-  const secondCooldown = useRef(
-    Number(import.meta.env.VITE_COOLDOWN_RESEND_OTP) || 60,
+  const secondCoolDown = useRef(
+    Number(import.meta.env.VITE_COOL_DOWN_RESEND_OTP) || 60,
   );
-  const [cooldown, setCooldown] = React.useState(secondCooldown.current || 60);
+  const [coolDown, setCoolDown] = React.useState(secondCoolDown.current || 60);
   const otpRef = useRef<HTMLDivElement>(null);
 
   const confirm = useMutation({
@@ -45,7 +45,7 @@ const ConfirmOtpForm = ({ email, length = 6, onSuccess }: ConfirmOtpForm) => {
       return await sendOtp(data);
     },
     onSuccess: () => {
-      setCooldown(secondCooldown.current);
+      setCoolDown(secondCoolDown.current);
     },
   });
 
@@ -65,13 +65,20 @@ const ConfirmOtpForm = ({ email, length = 6, onSuccess }: ConfirmOtpForm) => {
     confirm.mutate({ email, otp });
   };
 
-  // countdown timer for cooldown
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
+
+  // countdown timer for coolDown
   React.useEffect(() => {
-    if (cooldown > 0) {
-      const timer = setInterval(() => setCooldown((c) => c - 1), 1000);
+    if (coolDown > 0) {
+      const timer = setInterval(() => setCoolDown((c) => c - 1), 1000);
       return () => clearInterval(timer);
     }
-  }, [cooldown]);
+  }, [coolDown]);
 
   return (
     <Box paddingX={10} paddingY={8}>
@@ -87,6 +94,7 @@ const ConfirmOtpForm = ({ email, length = 6, onSuccess }: ConfirmOtpForm) => {
             value={otp}
             validateChar={validateChar}
             onChange={handleChange}
+            onKeyDown={handleKeyDown}
             autoFocus
           />
         </Box>
@@ -100,12 +108,13 @@ const ConfirmOtpForm = ({ email, length = 6, onSuccess }: ConfirmOtpForm) => {
         </Button>
         <Box mt={3}>
           <Button
+            onKeyDown={handleKeyDown}
             variant="text"
             onClick={() => resendOtp.mutate({ email })}
-            disabled={cooldown > 0}
+            disabled={coolDown > 0}
             loading={resendOtp.isPending}
           >
-            {cooldown > 0 ? `Resend OTP in ${cooldown}s` : 'Resend OTP'}
+            {coolDown > 0 ? `Resend OTP in ${coolDown}s` : 'Resend OTP'}
           </Button>
         </Box>
       </Box>

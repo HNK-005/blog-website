@@ -2,6 +2,7 @@ import Axios, { type InternalAxiosRequestConfig } from 'axios';
 import toast from 'react-hot-toast';
 import { env } from 'src/config/env';
 import { refreshToken } from './auth';
+import { useAuthStore } from 'src/features/auth/store/auth-store';
 
 let isRefreshing = false;
 let isRetry = false;
@@ -59,17 +60,14 @@ api.interceptors.response.use(
     isRetry = true;
 
     try {
-      // Gọi API refresh token
       await refreshToken();
 
       onRefreshed();
 
       return api(originalRequest);
     } catch (refreshError) {
-      // Nếu refresh fail → logout luôn
-      toast.error('Your session has expired. Please log in again!');
-      sessionStorage.removeItem('user');
-
+      const { logout } = useAuthStore.getState();
+      logout();
       return Promise.reject(refreshError);
     } finally {
       isRefreshing = false;
