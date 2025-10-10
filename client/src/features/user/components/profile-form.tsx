@@ -17,12 +17,13 @@ import {
   type ProfileInput,
 } from 'src/lib/user';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useAuth } from 'src/features/auth/context/auth-provider';
 import { useMutation } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
+import { useAuthStore } from 'src/features/auth/store/auth-store';
 
 export const ProfileForm = () => {
-  const { user } = useAuth();
+  const { user } = useAuthStore.getState();
+
   const [preview, setPreview] = React.useState<string | undefined>(
     user?.avatar?.path,
   );

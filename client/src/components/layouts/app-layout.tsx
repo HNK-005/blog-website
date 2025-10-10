@@ -15,10 +15,10 @@ import AccountCircle from '@mui/icons-material/AccountCircle';
 import MailIcon from '@mui/icons-material/Mail';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import MoreIcon from '@mui/icons-material/MoreVert';
-import { useAuth } from 'src/features/auth/context/auth-provider';
 import { Button, Link } from '@mui/material';
 import { Link as RouterLink } from 'react-router';
 import { paths } from 'src/config/paths';
+import { useAuthStore } from 'src/features/auth/store/auth-store';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -61,7 +61,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 const PrimarySearchAppBar = () => {
-  const { isAuthenticated } = useAuth();
+  const { user } = useAuthStore.getState();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] =
     React.useState<null | HTMLElement>(null);
@@ -203,7 +203,7 @@ const PrimarySearchAppBar = () => {
           </Search>
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-            {isAuthenticated ? (
+            {user ? (
               <>
                 {/* Nút hiển thị khi đã login */}
                 <IconButton

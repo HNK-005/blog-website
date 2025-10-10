@@ -1,10 +1,11 @@
 import { paths } from 'src/config/paths';
 import { QueryClient, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { createBrowserRouter } from 'react-router';
+import { createBrowserRouter, Outlet } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 import AppRoot from './routes/app/root';
 import LoadingPage from 'src/components/loadings/loading-page';
+import { ProtectRoute } from 'src/features/auth/guards/protect-route';
 
 const convert = (queryClient: QueryClient) => (m: any) => {
   const { clientLoader, clientAction, default: Component, ...rest } = m;
@@ -21,16 +22,11 @@ export const createAppRouter = (queryClient: QueryClient) =>
     {
       path: paths.app.root.path,
       hydrateFallbackElement: <LoadingPage />,
-      element: <AppRoot />,
       children: [
         {
           path: paths.app.home.path,
           lazy: () =>
             import('src/app/routes/app/home').then(convert(queryClient)),
-        },
-        {
-          path: '*',
-          lazy: () => import('./routes/not-found').then(convert(queryClient)),
         },
         {
           path: paths.app.auth.register.path,
@@ -43,9 +39,22 @@ export const createAppRouter = (queryClient: QueryClient) =>
             import('./routes/app/auth/login').then(convert(queryClient)),
         },
         {
-          path: paths.app.user.profile.path,
-          lazy: () =>
-            import('./routes/app/user/profile').then(convert(queryClient)),
+          element: (
+            <ProtectRoute>
+              <AppRoot />
+            </ProtectRoute>
+          ),
+          children: [
+            {
+              path: paths.app.user.profile.path,
+              lazy: () =>
+                import('./routes/app/user/profile').then(convert(queryClient)),
+            },
+          ],
+        },
+        {
+          path: '*',
+          lazy: () => import('./routes/not-found').then(convert(queryClient)),
         },
       ],
     },

@@ -6,8 +6,8 @@ import { AuthLayout } from 'src/components/layouts';
 import { paths } from 'src/config/paths';
 import { LoginForm } from 'src/features/auth/components/login-form';
 import { OtpStepper } from 'src/features/auth/components/otp-stepper';
-import { useAuth } from 'src/features/auth/context/auth-provider';
 import { useDisclosure } from 'src/hook/use-disclosure';
+import { useAuthStore } from 'src/features/auth/store/auth-store';
 import type { AuthResponse } from 'src/types/api';
 
 const RegisterRoot = () => {
@@ -16,12 +16,12 @@ const RegisterRoot = () => {
   const [email, setEmail] = React.useState('');
   const { isOpen, open, close } = useDisclosure(false);
   const [searchParams] = useSearchParams();
-  const { login } = useAuth();
+  const { setUser } = useAuthStore.getState();
 
   const redirectTo = searchParams.get('redirectTo');
   const handleLoginSuccess = (data: AuthResponse) => {
     close();
-    login(data.user);
+    setUser(data.user);
     navigate(redirectTo || paths.app.home.getHref(), { replace: true });
   };
 

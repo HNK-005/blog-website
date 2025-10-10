@@ -5,7 +5,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { MainErrorFallback } from 'src/components/errors/main';
 import { queryConfig } from 'src/lib/react-query';
 import { Toaster } from 'react-hot-toast';
-import { AuthProvider } from 'src/features/auth/context/auth-provider';
+import { AuthProvider } from 'src/features/auth/provider/auth-provider';
 
 export const AppProvider = ({ children }: React.PropsWithChildren) => {
   const [queryClient] = React.useState(
