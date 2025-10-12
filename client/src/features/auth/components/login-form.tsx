@@ -20,27 +20,18 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useDisclosure } from 'src/hook/use-disclosure';
 import { paths } from 'src/config/paths';
 import { useMutation } from '@tanstack/react-query';
-import type { AxiosError } from 'axios';
 import type { AuthResponse } from 'src/types/api';
 
 type LoginFormProps = {
   onSuccess: (data: AuthResponse) => void;
-  onError: (
-    error: AxiosError,
-    variables: {
-      email: string;
-      password: string;
-    },
-  ) => void;
 };
 
-export const LoginForm = ({ onSuccess, onError }: LoginFormProps) => {
+export const LoginForm = ({ onSuccess }: LoginFormProps) => {
   const login = useMutation({
     mutationFn: async (data: LoginInput) => {
       return await loginWithEmailAndPassword(data);
     },
     onSuccess,
-    onError,
   });
 
   const {

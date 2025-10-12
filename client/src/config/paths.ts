@@ -8,6 +8,9 @@ export const paths = {
       path: '',
       getHref: () => '/',
     },
+    confirmEmail: {
+      path: '/confirm-email',
+    },
     auth: {
       register: {
         path: '/auth/register',
