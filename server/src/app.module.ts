@@ -12,6 +12,7 @@ import { MailModule } from './modules/mail/mail.module';
 import authConfig from './modules/auth/config/auth.config';
 import fileConfig from './modules/file/config/file.config';
 import { FileModule } from './modules/file/file.module';
+import { SessionModule } from './modules/session/session.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { FileModule } from './modules/file/file.module';
     UserModule,
     MailerModule,
     MailModule,
+    SessionModule,
     FileModule,
   ],
 })

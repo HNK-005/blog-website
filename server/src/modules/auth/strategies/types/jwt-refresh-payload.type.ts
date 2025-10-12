@@ -1,8 +1,8 @@
 import { Session } from 'src/modules/session/domain/session';
-import { User } from 'src/modules/user/domain/user';
 
-export type JwtPayloadType = Pick<User, 'id' | 'role'> & {
+export type JwtRefreshPayloadType = {
   sessionId: Session['id'];
+  hash: Session['hash'];
   iat: number;
   exp: number;
 };

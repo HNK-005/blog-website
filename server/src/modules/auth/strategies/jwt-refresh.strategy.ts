@@ -2,11 +2,10 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ConfigService } from '@nestjs/config';
-import { JwtPayloadType } from './types/jwt-payload.type';
+import { JwtRefreshPayloadType } from './types/jwt-refresh-payload.type';
 import { OrNeverType } from 'src/utils/types/or-never.type';
 import { AllConfigType } from 'src/config/config.type';
-import { Request } from 'express';
-
+import type { Request } from 'supertest';
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
   Strategy,
@@ -23,8 +22,10 @@ export class JwtRefreshStrategy extends PassportStrategy(
     });
   }
 
-  public validate(payload: JwtPayloadType): OrNeverType<JwtPayloadType> {
-    if (!payload.id) {
+  public validate(
+    payload: JwtRefreshPayloadType,
+  ): OrNeverType<JwtRefreshPayloadType> {
+    if (!payload.sessionId) {
       throw new UnauthorizedException();
     }
 
