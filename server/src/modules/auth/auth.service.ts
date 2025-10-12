@@ -8,10 +8,7 @@ import { AuthRegisterLoginDto } from './dto/auth-register-login.dto';
 import { UserService } from '../user/user.service';
 import { RoleEnum } from '../role/role.enum';
 import { StatusEnum } from '../status/status.enum';
-import { VerificationService } from '../verification/verification.service';
-import { AuthConfirmEmailDto } from './dto/auth-confirm-email.dto';
 import { MailService } from '../mail/mail.service';
-import { generateDuration, generateOtp } from 'src/utils/generate';
 import bcrypt from 'bcryptjs';
 import { AuthEmailLoginDto } from './dto/auth-email-login.dto';
 import { AuthProvidersEnum } from './auth-providers.enum';
@@ -19,8 +16,6 @@ import { User } from '../user/domain/user';
 import { ConfigService } from '@nestjs/config/dist/config.service';
 import { AllConfigType } from 'src/config/config.type';
 import { JwtService } from '@nestjs/jwt/dist/jwt.service';
-import ms from 'ms';
-import { AuthSendOtpDto } from './dto/auth-resend-otp.dto';
 import { NullableType } from 'src/utils/types/nullable.type';
 import { JwtPayloadType } from './strategies/types/jwt-payload.type';
 import { AuthUpdateDto } from './dto/auth-update.dto';
@@ -29,8 +24,7 @@ import { AuthUpdateDto } from './dto/auth-update.dto';
 export class AuthService {
   constructor(
     private readonly userService: UserService,
-    private readonly verification: VerificationService,
-    private readonly mail: MailService,
+    private readonly mailService: MailService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService<AllConfigType>,
   ) {}
@@ -47,25 +41,26 @@ export class AuthService {
       },
     });
 
-    const { id, email } = user;
-
-    const otpExpiresIn = this.configService.getOrThrow(
-      'auth.confirmEmailExpires',
+    const hash = await this.jwtService.signAsync(
       {
-        infer: true,
+        confirmEmailUserId: user.id,
+      },
+      {
+        secret: this.configService.getOrThrow('auth.confirmEmailSecret', {
+          infer: true,
+        }),
+        expiresIn: this.configService.getOrThrow('auth.confirmEmailExpires', {
+          infer: true,
+        }),
       },
     );
 
-    const otp = generateOtp();
-    const expiresAt = generateDuration(otpExpiresIn);
-
-    await this.verification.create({
-      userId: id,
-      token: otp,
-      expiresAt,
+    await this.mailService.registerEmail({
+      to: dto.email,
+      data: {
+        hash,
+      },
     });
-
-    await this.mail.registerEmail({ to: email, data: { otp, expiresAt } });
   }
 
   async login(dto: AuthEmailLoginDto): Promise<{
@@ -228,74 +223,76 @@ export class AuthService {
     return this.userService.findById(userJwtPayload.id);
   }
 
-  async resendOtp(dto: AuthSendOtpDto): Promise<void> {
-    const user = await this.userService.findByEmail(dto.email);
+  async confirmEmail(hash: string): Promise<void> {
+    let userId: User['id'];
+
+    try {
+      const jwtData = await this.jwtService.verifyAsync<{
+        confirmEmailUserId: User['id'];
+      }>(hash, {
+        secret: this.configService.getOrThrow('auth.confirmEmailSecret', {
+          infer: true,
+        }),
+      });
+
+      userId = jwtData.confirmEmailUserId;
+    } catch {
+      throw new UnprocessableEntityException({
+        errors: {
+          hash: `invalidHash`,
+        },
+      });
+    }
+
+    const user = await this.userService.findById(userId);
 
     if (
       !user ||
       user?.status?.id?.toString() !== StatusEnum.inactive.toString()
     ) {
-      throw new NotFoundException();
-    }
-
-    const otp = generateOtp();
-    const expiresAt = generateDuration(
-      this.configService.getOrThrow('auth.confirmEmailExpires', {
-        infer: true,
-      }),
-    );
-
-    const verification = await this.verification.findByUserId(user.id);
-
-    if (verification) {
-      await this.verification.update(verification.id, {
-        token: otp,
-        expiresAt,
-      });
-    } else {
-      await this.verification.create({
-        userId: user.id,
-        token: otp,
-        expiresAt,
+      throw new NotFoundException({
+        error: `notFound`,
       });
     }
 
-    await this.mail.registerEmail({ to: user.email, data: { otp, expiresAt } });
-  }
-
-  async confirmEmailWithOtp(dto: AuthConfirmEmailDto) {
-    const user = await this.userService.findByEmail(dto.email);
-
-    if (
-      !user ||
-      user?.status?.id?.toString() !== StatusEnum.inactive.toString()
-    ) {
-      throw new NotFoundException();
-    }
-
-    const verification = await this.verification.findByUserId(user.id);
-
-    if (!verification) {
-      throw new NotFoundException();
-    }
-
-    const now = new Date();
-
-    if (now > verification.expiresAt) {
-      throw new BadRequestException('Your OTP has expired');
-    }
-
-    const compareOtp = await bcrypt.compare(dto.otp, verification.token);
-
-    if (!compareOtp) {
-      throw new BadRequestException('OTP wrong');
-    }
-
-    this.verification.deleteById(verification.id);
-
-    user.status.id = StatusEnum.active;
+    user.status = {
+      id: StatusEnum.active,
+    };
 
     await this.userService.update(user.id, user);
+  }
+
+  async sendEmail(email: string): Promise<void> {
+    const user = await this.userService.findByEmail(email);
+
+    if (!user) {
+      throw new UnprocessableEntityException({
+        errors: {
+          user: `notFound`,
+        },
+      });
+    }
+
+    const hash = await this.jwtService.signAsync(
+      {
+        confirmEmailUserId: user.id,
+      },
+      {
+        secret: this.configService.getOrThrow('auth.confirmEmailSecret', {
+          infer: true,
+        }),
+        expiresIn: this.configService.getOrThrow('auth.confirmEmailExpires', {
+          infer: true,
+        }),
+      },
+    );
+
+    await this.mailService.registerEmail({
+      to: email,
+      data: {
+        hash,
+      },
+    });
   }
 
   async me(userJwtPayload: JwtPayloadType): Promise<NullableType<User>> {

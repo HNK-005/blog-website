@@ -1,26 +1,52 @@
 import { Injectable } from '@nestjs/common';
 import { MailerService } from '../mailer/mailer.service';
 import { MailData } from './interfaces/mail-data.interface';
-import { formatDate } from 'src/utils/format-date';
+import { ConfigService } from '@nestjs/config';
+import { AllConfigType } from 'src/config/config.type';
 
 @Injectable()
 export class MailService {
-  constructor(private readonly mailerService: MailerService) {}
+  constructor(
+    private readonly mailerService: MailerService,
+    private readonly configService: ConfigService<AllConfigType>,
+  ) {}
 
-  async registerEmail(mailData: MailData<{ otp: string; expiresAt: Date }>) {
+  async registerEmail(mailData: MailData<{ hash: string }>) {
     const {
       to,
-      data: { otp, expiresAt },
+      data: { hash },
     } = mailData;
+
+    const emailConfirmTitle: string = 'Confirm your email';
+    const text1: string = 'Hi there';
+    const text2: string = 'Thanks for registering at';
+    const text3: string =
+      'Please confirm your email address to activate your account on';
+
+    const url = new URL(
+      this.configService.getOrThrow('app.frontendDomain', {
+        infer: true,
+      }) + '/confirm-email',
+    );
+
+    const redirectTo = '/auth/login';
+    url.searchParams.set('hash', hash);
+    url.searchParams.set('email', to);
+    url.searchParams.set('redirectTo', redirectTo);
 
     await this.mailerService.sendMail({
       to,
-      subject: 'OTP code to verify account',
-      templatePath: 'send-otp',
+      subject: emailConfirmTitle,
+      text: `${url.toString()} ${emailConfirmTitle}`,
+      templatePath: 'activation',
       context: {
-        otp,
-        expiresAt: formatDate(expiresAt),
-        year: new Date().getFullYear(),
+        title: emailConfirmTitle,
+        url: url.toString(),
+        actionTitle: emailConfirmTitle,
+        app_name: this.configService.get('app.name', { infer: true }),
+        text1,
+        text2,
+        text3,
       },
     });
   }

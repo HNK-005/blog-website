@@ -26,11 +26,6 @@ export const loginInputSchema = z.object({
 
 export type RegisterInput = z.infer<typeof registerInputSchema>;
 export type LoginInput = z.infer<typeof loginInputSchema>;
-export type ConfirmInput = {
-  email: string;
-  otp: string;
-};
-export type SendOtp = Omit<ConfirmInput, 'otp'>;
 
 export const registerWithEmailAndPassword = (
   data: RegisterInput,
@@ -44,12 +39,12 @@ export const loginWithEmailAndPassword = (
   return api.post('/auth/email/login', data);
 };
 
-export const confirmEmail = (data: ConfirmInput): Promise<any> => {
+export const confirmEmail = (data: { hash: string }): Promise<any> => {
   return api.post('/auth/email/confirm', data);
 };
 
-export const sendOtp = (data: SendOtp): Promise<any> => {
-  return api.post('/auth/email/new-otp', data);
+export const resendEmail = (data: { email: string }): Promise<any> => {
+  return api.post('/auth/email/send', data);
 };
 
 export const me = (): Promise<User> => {

@@ -18,11 +18,11 @@ import { AuthRegisterLoginDto } from './dto/auth-register-login.dto';
 import { AuthConfirmEmailDto } from './dto/auth-confirm-email.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { AuthEmailLoginDto } from './dto/auth-email-login.dto';
-import { AuthSendOtpDto } from './dto/auth-resend-otp.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from '../user/domain/user';
 import { NullableType } from 'src/utils/types/nullable.type';
 import { AuthUpdateDto } from './dto/auth-update.dto';
+import { AuthSendEmailDto } from './dto/auth-send-email';
 
 @ApiTags('Auth')
 @Controller({
@@ -66,18 +66,18 @@ export class AuthController {
     };
   }
 
-  @Post('email/new-otp')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async newOtp(@Body() sendOtpDto: AuthSendOtpDto): Promise<void> {
-    return this.service.resendOtp(sendOtpDto);
-  }
-
   @Post('email/confirm')
-  @HttpCode(HttpStatus.OK)
+  @HttpCode(HttpStatus.NO_CONTENT)
   async confirmEmail(
     @Body() confirmEmailDto: AuthConfirmEmailDto,
   ): Promise<void> {
-    return this.service.confirmEmailWithOtp(confirmEmailDto);
+    return this.service.confirmEmail(confirmEmailDto.hash);
+  }
+
+  @Post('email/send')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async send(@Body() confirmEmailDto: AuthSendEmailDto): Promise<void> {
+    return this.service.sendEmail(confirmEmailDto.email);
   }
 
   @SerializeOptions({
