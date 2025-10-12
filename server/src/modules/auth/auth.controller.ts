@@ -11,7 +11,7 @@ import {
   SerializeOptions,
   UseGuards,
 } from '@nestjs/common';
-import type { Request, Response } from 'express';
+import type { Response } from 'express';
 import { AuthService } from './auth.service';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AuthRegisterLoginDto } from './dto/auth-register-login.dto';
@@ -47,23 +47,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
     @Body() loginDto: AuthEmailLoginDto,
   ): Promise<LoginResponseDto> {
-    const login = await this.service.login(loginDto);
-
-    res.cookie('accessToken', login.token, {
-      httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
-    });
-
-    res.cookie('refreshToken', login.refreshToken, {
-      httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
-    });
-
-    return {
-      user: login.user,
-    };
+    return this.service.login(res, loginDto);
   }
 
   @Post('email/confirm')
@@ -87,12 +71,7 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt-refresh'))
   @HttpCode(HttpStatus.NO_CONTENT)
   async refresh(@Req() req, @Res({ passthrough: true }) res): Promise<void> {
-    const { token } = await this.service.refreshToken(req.user);
-    res.cookie('accessToken', token, {
-      httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
-    });
+    return this.service.refreshToken(res, req.user);
   }
 
   @SerializeOptions({

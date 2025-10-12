@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { AuthRegisterLoginDto } from './dto/auth-register-login.dto';
@@ -19,6 +20,14 @@ import { JwtService } from '@nestjs/jwt/dist/jwt.service';
 import { NullableType } from 'src/utils/types/nullable.type';
 import { JwtPayloadType } from './strategies/types/jwt-payload.type';
 import { AuthUpdateDto } from './dto/auth-update.dto';
+import { SessionService } from '../session/session.service';
+import type { Response } from 'express';
+import { Session } from '../session/domain/session';
+import ms from 'ms';
+import crypto from 'crypto';
+import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
+import { JwtRefreshPayloadType } from './strategies/types/jwt-refresh-payload.type';
+import { LoginResponseDto } from './dto/login-response.dto';
 
 @Injectable()
 export class AuthService {
@@ -26,6 +35,7 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly mailService: MailService,
     private readonly jwtService: JwtService,
+    private readonly sessionService: SessionService,
     private readonly configService: ConfigService<AllConfigType>,
   ) {}
 
@@ -63,11 +73,7 @@ export class AuthService {
     });
   }
 
-  async login(dto: AuthEmailLoginDto): Promise<{
-    token: string;
-    refreshToken: string;
-    user: User;
-  }> {
+  async login(res: Response, dto: AuthEmailLoginDto): Promise<{ user: User }> {
     const user = await this.userService.findByEmail(dto.email);
 
     if (!user) {
@@ -115,16 +121,43 @@ export class AuthService {
       throw new BadRequestException('Password wrong');
     }
 
-    const { token, refreshToken } = await this.getTokensData({
-      id: user.id,
-      role: user.role,
+    const hash = crypto
+      .createHash('sha256')
+      .update(randomStringGenerator())
+      .digest('hex');
+
+    const session = await this.sessionService.create({
+      user,
+      hash,
     });
 
-    return {
-      token,
+    const {
+      token: jwtToken,
       refreshToken,
-      user,
-    };
+      tokenExpires,
+      refreshTokenExpires,
+    } = await this.getTokensData({
+      id: user.id,
+      role: user.role,
+      sessionId: session.id,
+      hash,
+    });
+
+    res.cookie('accessToken', jwtToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      expires: new Date(tokenExpires),
+    });
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      expires: new Date(refreshTokenExpires),
+    });
+
+    return { user };
   }
 
   async update(
@@ -300,25 +333,84 @@ export class AuthService {
   }
 
   async refreshToken(
-    userJwtPayload: JwtPayloadType,
-  ): Promise<{ token: string }> {
-    const { id, role } = userJwtPayload;
-    const { token } = await this.getTokensData({ id, role });
-    return {
-      token,
-    };
-  }
+    res: Response,
+    data: Pick<JwtRefreshPayloadType, 'sessionId' | 'hash'>,
+  ): Promise<void> {
+    const session = await this.sessionService.findById(data.sessionId);
 
-  private async getTokensData(data: { id: User['id']; role: User['role'] }) {
+    if (!session) {
+      throw new UnauthorizedException();
+    }
+
+    if (session.hash !== data.hash) {
+      throw new UnauthorizedException();
+    }
+
+    const hash = crypto
+      .createHash('sha256')
+      .update(randomStringGenerator())
+      .digest('hex');
+
+    const user = await this.userService.findById(session.user.id);
+
+    if (!user?.role) {
+      throw new UnauthorizedException();
+    }
+
+    await this.sessionService.update(session.id, {
+      hash,
+    });
+
+    const { token, refreshToken, tokenExpires, refreshTokenExpires } =
+      await this.getTokensData({
+        id: session.user.id,
+        role: {
+          id: user.role.id,
+        },
+        sessionId: session.id,
+        hash,
+      });
+
+    res.cookie('accessToken', token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      expires: new Date(tokenExpires),
+    });
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      expires: new Date(refreshTokenExpires),
+    });
+  }
+  private async getTokensData(data: {
+    id: User['id'];
+    role: User['role'];
+    sessionId: Session['id'];
+    hash: Session['hash'];
+  }) {
     const tokenExpiresIn = this.configService.getOrThrow('auth.expires', {
       infer: true,
     });
+
+    const refreshTokenExpiresIn = this.configService.getOrThrow(
+      'auth.refreshExpires',
+      {
+        infer: true,
+      },
+    );
+
+    const tokenExpires = Date.now() + ms(tokenExpiresIn);
+    const refreshTokenExpires = Date.now() + ms(refreshTokenExpiresIn);
 
     const [token, refreshToken] = await Promise.all([
       await this.jwtService.signAsync(
         {
           id: data.id,
           role: data.role,
+          sessionId: data.sessionId,
         },
         {
           secret: this.configService.getOrThrow('auth.secret', { infer: true }),
@@ -327,8 +419,8 @@ export class AuthService {
       ),
       await this.jwtService.signAsync(
         {
-          id: data.id,
-          role: data.role,
+          sessionId: data.sessionId,
+          hash: data.hash,
         },
         {
           secret: this.configService.getOrThrow('auth.refreshSecret', {
@@ -344,6 +436,8 @@ export class AuthService {
     return {
       token,
       refreshToken,
+      tokenExpires,
+      refreshTokenExpires,
     };
   }
 }
