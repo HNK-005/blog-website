@@ -3,7 +3,7 @@ import {
   Module,
 } from '@nestjs/common';
 
-import { PersistenceModule } from './infrastructure/persistence/document/persistence.module';
+import { PersistenceModule } from './infrastructure/persistence/persistence.module';
 import { FileService } from './file.service';
 import { FilesLocalModule } from './infrastructure/uploader/local/file.module';
 

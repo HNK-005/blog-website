@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 
-import { FileRepository } from '../../file.repository';
+import { FileRepository } from '../file.repository';
 import { FileSchemaClass } from '../entities/file.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { FileType } from '../../../../domain/file';
+import { FileType } from '../../../domain/file';
 
 import { FileMapper } from '../mappers/file.mapper';
 import { NullableType } from 'src/utils/types/nullable.type';
