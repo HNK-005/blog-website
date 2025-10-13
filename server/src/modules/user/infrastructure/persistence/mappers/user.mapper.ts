@@ -4,8 +4,8 @@ import { Role } from 'src/modules/role/domain/role';
 import { Status } from 'src/modules/status/domain/status';
 import { RoleSchema } from 'src/modules/role/infrastructure/entities/role.schema';
 import { StatusSchema } from 'src/modules/status/infrastructure/entities/status.schema';
-import { FileMapper } from 'src/modules/file/infrastructure/persistence/document/mappers/file.mapper';
-import { FileSchemaClass } from 'src/modules/file/infrastructure/persistence/document/entities/file.schema';
+import { FileMapper } from 'src/modules/file/infrastructure/persistence/mappers/file.mapper';
+import { FileSchemaClass } from 'src/modules/file/infrastructure/persistence/entities/file.schema';
 
 export class UserMapper {
   static toDomain(raw: UserSchemaClass): User {

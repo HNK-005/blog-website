@@ -11,7 +11,7 @@ import { randomStringGenerator } from '@nestjs/common/utils/random-string-genera
 
 import { FileLocalService } from './file.service';
 
-import { PersistenceModule } from '../../persistence/document/persistence.module';
+import { PersistenceModule } from '../../persistence/persistence.module';
 import { AllConfigType } from 'src/config/config.type';
 
 @Module({
