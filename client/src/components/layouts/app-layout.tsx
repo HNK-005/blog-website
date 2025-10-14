@@ -19,6 +19,8 @@ import { Button, Link } from '@mui/material';
 import { Link as RouterLink } from 'react-router';
 import { paths } from 'src/config/paths';
 import { useAuthStore } from 'src/features/auth/store/auth-store';
+import { useMutation } from '@tanstack/react-query';
+import { logout } from 'src/lib/auth';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -61,10 +63,17 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 const PrimarySearchAppBar = () => {
-  const { user } = useAuthStore.getState();
+  const { user, setUser } = useAuthStore.getState();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] =
     React.useState<null | HTMLElement>(null);
+
+  const logoutMutation = useMutation({
+    mutationFn: async () => await logout(),
+    onSuccess: () => {
+      setUser(null);
+    },
+  });
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -111,7 +120,14 @@ const PrimarySearchAppBar = () => {
         Profile
       </MenuItem>
       <MenuItem onClick={handleMenuClose}>My account</MenuItem>
-      <MenuItem onClick={handleMenuClose}>Logout</MenuItem>
+      <MenuItem
+        onClick={() => {
+          handleMenuClose();
+          logoutMutation.mutate();
+        }}
+      >
+        Logout
+      </MenuItem>
     </Menu>
   );
 
@@ -257,7 +273,7 @@ const PrimarySearchAppBar = () => {
 
                 <Button
                   component={RouterLink}
-                  to={paths.app.auth.login.getHref()}
+                  to={paths.app.auth.register.getHref()}
                   variant="outlined"
                   color="inherit"
                   sx={{ ml: 1 }}

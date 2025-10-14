@@ -16,8 +16,8 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
 
   React.useEffect(() => {
     useAuthStore.subscribe((state, preState) => {
-      if (!state.user && state.user != preState.user) {
-        mutate();
+      if (preState.user && !state.user) {
+        return mutate();
       }
     });
     mutate();

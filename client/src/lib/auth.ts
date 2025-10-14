@@ -39,6 +39,10 @@ export const loginWithEmailAndPassword = (
   return api.post('/auth/email/login', data);
 };
 
+export const logout = () => {
+  return api.post('/auth/logout');
+};
+
 export const confirmEmail = (data: { hash: string }): Promise<any> => {
   return api.post('/auth/email/confirm', data);
 };
