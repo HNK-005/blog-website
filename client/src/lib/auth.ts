@@ -47,10 +47,6 @@ export const confirmEmail = (data: { hash: string }): Promise<any> => {
   return api.post('/auth/email/confirm', data);
 };
 
-export const resendEmail = (data: { email: string }): Promise<any> => {
-  return api.post('/auth/email/send', data);
-};
-
 export const me = (): Promise<User> => {
   return api.get('/auth/me');
 };

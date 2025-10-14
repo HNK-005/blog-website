@@ -73,12 +73,15 @@ export class AuthService {
     });
   }
 
-  async login(res: Response, dto: AuthEmailLoginDto): Promise<{ user: User }> {
+  async login(
+    res: Response,
+    dto: AuthEmailLoginDto,
+  ): Promise<LoginResponseDto> {
     const user = await this.userService.findByEmail(dto.email);
 
     if (!user) {
       throw new UnprocessableEntityException({
-        message: 'User not found',
+        message: 'Email not exists',
         errors: {
           email: 'notFound',
         },
@@ -90,7 +93,7 @@ export class AuthService {
       user.status?.id.toString() === StatusEnum.inactive.toString()
     ) {
       throw new UnprocessableEntityException({
-        message: 'User not active',
+        message: 'Email not active, Please check your mail',
         errors: {
           email: 'notActive',
         },
@@ -99,7 +102,7 @@ export class AuthService {
 
     if (user.provider !== AuthProvidersEnum.email) {
       throw new UnprocessableEntityException({
-        message: 'User registered via another provider',
+        message: `Please login with ${user.provider}`,
         errors: {
           email: `needLoginViaProvider:${user.provider}`,
         },
@@ -271,6 +274,7 @@ export class AuthService {
       userId = jwtData.confirmEmailUserId;
     } catch {
       throw new UnprocessableEntityException({
+        message: 'Hash verify invalid',
         errors: {
           hash: `invalidHash`,
         },
@@ -283,9 +287,7 @@ export class AuthService {
       !user ||
       user?.status?.id?.toString() !== StatusEnum.inactive.toString()
     ) {
-      throw new NotFoundException({
-        error: `notFound`,
-      });
+      throw new NotFoundException('User not found');
     }
 
     user.status = {
@@ -293,39 +295,6 @@ export class AuthService {
     };
 
     await this.userService.update(user.id, user);
-  }
-
-  async sendEmail(email: string): Promise<void> {
-    const user = await this.userService.findByEmail(email);
-
-    if (!user) {
-      throw new UnprocessableEntityException({
-        errors: {
-          user: `notFound`,
-        },
-      });
-    }
-
-    const hash = await this.jwtService.signAsync(
-      {
-        confirmEmailUserId: user.id,
-      },
-      {
-        secret: this.configService.getOrThrow('auth.confirmEmailSecret', {
-          infer: true,
-        }),
-        expiresIn: this.configService.getOrThrow('auth.confirmEmailExpires', {
-          infer: true,
-        }),
-      },
-    );
-
-    await this.mailService.registerEmail({
-      to: email,
-      data: {
-        hash,
-      },
-    });
   }
 
   async me(userJwtPayload: JwtPayloadType): Promise<NullableType<User>> {

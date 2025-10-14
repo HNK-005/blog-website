@@ -22,7 +22,6 @@ import { AuthGuard } from '@nestjs/passport';
 import { User } from '../user/domain/user';
 import { NullableType } from 'src/utils/types/nullable.type';
 import { AuthUpdateDto } from './dto/auth-update.dto';
-import { AuthSendEmailDto } from './dto/auth-send-email';
 
 @ApiTags('Auth')
 @Controller({
@@ -56,12 +55,6 @@ export class AuthController {
     @Body() confirmEmailDto: AuthConfirmEmailDto,
   ): Promise<void> {
     return this.service.confirmEmail(confirmEmailDto.hash);
-  }
-
-  @Post('email/send')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async send(@Body() confirmEmailDto: AuthSendEmailDto): Promise<void> {
-    return this.service.sendEmail(confirmEmailDto.email);
   }
 
   @SerializeOptions({

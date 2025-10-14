@@ -26,7 +26,7 @@ import { AllConfigType } from 'src/config/config.type';
             if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/i)) {
               return callback(
                 new UnprocessableEntityException({
-                  status: HttpStatus.UNPROCESSABLE_ENTITY,
+                  message: "Can't upload file type",
                   errors: {
                     file: `cantUploadFileType`,
                   },

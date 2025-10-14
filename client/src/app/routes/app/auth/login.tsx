@@ -1,7 +1,7 @@
 import { useNavigate, useSearchParams } from 'react-router';
 import { AuthLayout } from 'src/components/layouts';
 import { paths } from 'src/config/paths';
-import { LoginForm } from 'src/features/auth/components/login-form';
+import { LoginForm } from 'src/features/auth/components';
 import { useAuthStore } from 'src/features/auth/store/auth-store';
 import type { AuthResponse } from 'src/types/api';
 

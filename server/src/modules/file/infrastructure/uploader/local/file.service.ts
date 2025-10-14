@@ -19,7 +19,7 @@ export class FileLocalService {
   async create(file: Express.Multer.File): Promise<{ file: FileType }> {
     if (!file) {
       throw new UnprocessableEntityException({
-        status: HttpStatus.UNPROCESSABLE_ENTITY,
+        message: 'Please select file',
         errors: {
           file: 'selectFile',
         },
