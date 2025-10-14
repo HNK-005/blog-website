@@ -385,6 +385,13 @@ export class AuthService {
       expires: new Date(refreshTokenExpires),
     });
   }
+
+  async logout(res: Response, data: Pick<JwtRefreshPayloadType, 'sessionId'>) {
+    await this.sessionService.deleteById(data.sessionId);
+    res.clearCookie('accessToken');
+    res.clearCookie('refreshToken');
+  }
+
   private async getTokensData(data: {
     id: User['id'];
     role: User['role'];

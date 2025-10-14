@@ -74,6 +74,19 @@ export class AuthController {
     return this.service.refreshToken(res, req.user);
   }
 
+  @ApiBearerAuth()
+  @Post('logout')
+  @UseGuards(AuthGuard('jwt'))
+  @HttpCode(HttpStatus.NO_CONTENT)
+  public async logout(
+    @Req() req,
+    @Res({ passthrough: true }) res,
+  ): Promise<void> {
+    return this.service.logout(res, {
+      sessionId: req.user.sessionId,
+    });
+  }
+
   @SerializeOptions({
     groups: ['me'],
   })
