@@ -29,10 +29,7 @@ export class MailService {
       }) + '/confirm-email',
     );
 
-    const redirectTo = '/auth/login';
     url.searchParams.set('hash', hash);
-    url.searchParams.set('email', to);
-    url.searchParams.set('redirectTo', redirectTo);
 
     await this.mailerService.sendMail({
       to,

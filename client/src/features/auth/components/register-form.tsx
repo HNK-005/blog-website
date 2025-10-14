@@ -22,15 +22,7 @@ import { paths } from 'src/config/paths';
 import { useMutation } from '@tanstack/react-query';
 
 type RegisterFormProps = {
-  onSuccess: (
-    _data: any,
-    variables: {
-      firstName: string;
-      lastName: string;
-      email: string;
-      password: string;
-    },
-  ) => void;
+  onSuccess: () => void;
 };
 
 export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
