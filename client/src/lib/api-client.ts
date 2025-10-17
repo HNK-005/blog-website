@@ -39,10 +39,6 @@ api.interceptors.response.use(
     const originalRequest = error.config;
     const message = error.response?.data?.message || error.message;
 
-    if (error.response?.status === 422) {
-      return Promise.reject(error);
-    }
-
     if (error.response?.status !== 401) {
       toast.error(message);
       return Promise.reject(error);

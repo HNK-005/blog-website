@@ -12,8 +12,8 @@ const RegisterRoot = () => {
   const { setUser } = useAuthStore.getState();
 
   const redirectTo = searchParams.get('redirectTo');
+
   const handleLoginSuccess = (data: AuthResponse) => {
-    close();
     setUser(data.user);
     navigate(redirectTo || paths.app.home.getHref(), { replace: true });
   };

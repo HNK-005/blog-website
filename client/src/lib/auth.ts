@@ -1,8 +1,7 @@
 import { z } from 'zod';
 import { api } from './api-client';
 import type { AuthResponse, User } from 'src/types/api';
-
-export const nameRegex = /^[A-Za-zÀ-ỹ]+(?:[ '-][A-Za-zÀ-ỹ]+)*$/;
+import { nameRegex } from './regex';
 
 export const registerInputSchema = z.object({
   firstName: z
