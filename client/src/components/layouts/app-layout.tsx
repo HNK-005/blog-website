@@ -241,6 +241,8 @@ const PrimarySearchAppBar = () => {
                   </Badge>
                 </IconButton>
                 <IconButton
+                  component={RouterLink}
+                  to={paths.app.post.create.getHref()}
                   size="large"
                   aria-label="show 4 new mails"
                   color="inherit"

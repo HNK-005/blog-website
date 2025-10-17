@@ -30,5 +30,11 @@ export const paths = {
           `/user/profile${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ''}`,
       },
     },
+    post: {
+      create: {
+        path: '/post/create',
+        getHref: () => '/post/create',
+      },
+    },
   },
 } as const;

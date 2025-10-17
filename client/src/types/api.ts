@@ -41,6 +41,14 @@ export type User = Entity<{
   deletedAt?: Date;
 }>;
 
+export type Post = Entity<{
+  title: string;
+  description?: string;
+  content: string;
+  banner?: FileResponse;
+  tags?: string[];
+}>;
+
 export type AuthResponse = {
   user: User;
 };
