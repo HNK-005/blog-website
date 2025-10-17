@@ -22,6 +22,10 @@ export class FileDocumentRepository implements FileRepository {
     return FileMapper.toDomain(fileObject);
   }
 
+  async deleteByPath(path: FileType['path']): Promise<void> {
+    await this.fileModel.deleteOne({ path });
+  }
+
   async findById(id: FileType['id']): Promise<NullableType<FileType>> {
     const fileObject = await this.fileModel.findById(id);
     return fileObject ? FileMapper.toDomain(fileObject) : null;

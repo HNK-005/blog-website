@@ -1,5 +1,6 @@
 import {
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -52,6 +53,13 @@ export class FileLocalController {
     @UploadedFile() file: Express.Multer.File,
   ): Promise<FileResponseDto> {
     return this.filesService.create(file);
+  }
+
+  @Delete(':filename')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  async deleteFile(@Param('filename') filename: string) {
+    return this.filesService.remove(filename);
   }
 
   @Get(':path')

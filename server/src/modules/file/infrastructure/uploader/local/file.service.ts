@@ -4,7 +4,8 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-
+import * as fs from 'fs';
+import * as path from 'path';
 import { FileRepository } from '../../persistence/file.repository';
 import { AllConfigType } from 'src/config/config.type';
 import { FileType } from 'src/modules/file/domain/file';
@@ -33,5 +34,26 @@ export class FileLocalService {
         })}/v1/${file.path}`,
       }),
     };
+  }
+
+  async remove(filename: string): Promise<void> {
+    const filePath = path.join(process.cwd(), 'files', filename);
+
+    if (!fs.existsSync(filePath)) {
+      throw new UnprocessableEntityException({
+        message: 'File not found',
+        errors: {
+          file: 'fileNotFound',
+        },
+      });
+    }
+
+    fs.unlinkSync(filePath);
+
+    await this.fileRepository.deleteByPath(
+      `/${this.configService.get('app.apiPrefix', {
+        infer: true,
+      })}/v1/files/${filename}`,
+    );
   }
 }

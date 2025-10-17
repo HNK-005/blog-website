@@ -124,12 +124,17 @@ export class AuthService {
       throw new BadRequestException('Password wrong');
     }
 
+    let session = await this.sessionService.findByUserId({ userId: user.id });
+    if (session) {
+      return { user };
+    }
+
     const hash = crypto
       .createHash('sha256')
       .update(randomStringGenerator())
       .digest('hex');
 
-    const session = await this.sessionService.create({
+    session = await this.sessionService.create({
       user,
       hash,
     });
@@ -251,8 +256,8 @@ export class AuthService {
     //   });
     // }
 
-    delete userDto.email;
-    delete userDto.oldPassword;
+    // delete userDto.email;
+    // delete userDto.oldPassword;
 
     await this.userService.update(userJwtPayload.id, userDto);
 

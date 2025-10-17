@@ -3,6 +3,7 @@ import {
   Avatar,
   Box,
   Button,
+  FormHelperText,
   Paper,
   Stack,
   TextField,
@@ -13,22 +14,30 @@ import { useForm, Controller } from 'react-hook-form';
 import {
   profileSchema,
   updateProfile,
-  uploadAvatar,
   type ProfileInput,
+  type ProfileUpdateInput,
 } from 'src/lib/user';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { useAuthStore } from 'src/features/auth/store/auth-store';
+import { remove, upload } from 'src/lib/file';
 
 export const ProfileForm = () => {
   const { user } = useAuthStore.getState();
+  const userAvatarPath = user?.avatar?.path;
 
   const [preview, setPreview] = React.useState<string | undefined>(
-    user?.avatar?.path,
+    userAvatarPath,
   );
-  const submitButton = React.useRef<HTMLButtonElement>(null);
-  const { control, handleSubmit, setValue } = useForm<ProfileInput>({
+
+  const {
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<ProfileInput>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       username: user?.username,
@@ -36,28 +45,92 @@ export const ProfileForm = () => {
       lastName: user?.lastName,
       email: user?.email,
       bio: user?.bio,
-      avatar: user?.avatar,
+      avatar: null,
     },
   });
+  const avatar = watch('avatar');
 
-  const upload = useMutation({
-    mutationFn: async (data: FormData) => await uploadAvatar(data),
-    onSuccess: (data) => {
-      setPreview(data.file.path);
-      setValue('avatar', data.file);
-    },
+  const uploadAvatar = useMutation({
+    mutationFn: async (data: FormData) => await upload(data),
+  });
+
+  const removeAvatar = useMutation({
+    mutationFn: async (path: string) => await remove(path),
   });
 
   const update = useMutation({
-    mutationFn: async (data: ProfileInput) => await updateProfile(data),
-    onSuccess: () => {
+    mutationFn: async (data: ProfileUpdateInput) => await updateProfile(data),
+    onSuccess: (data) => {
+      useAuthStore.getState().setUser(data);
       toast.success('Update profile successfully');
     },
   });
 
-  const onSubmit = (data: ProfileInput) => {
-    update.mutate(data);
-  };
+  const handleAvatarChange = React.useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      setValue('avatar', file, { shouldValidate: true });
+    },
+    [setValue],
+  );
+
+  const onSubmit = React.useCallback(
+    async (data: ProfileInput) => {
+      const { avatar: newAvatar, ...rest } = data;
+      const hasNewAvatar = Boolean(newAvatar);
+      const previousAvatarPath = userAvatarPath;
+      let uploadedFile: ProfileUpdateInput['avatar'];
+
+      try {
+        if (hasNewAvatar && newAvatar) {
+          const formData = new FormData();
+          formData.append('file', newAvatar);
+          const uploadRes = await uploadAvatar.mutateAsync(formData);
+          uploadedFile = uploadRes.file;
+        }
+      } catch {
+        toast.error('Failed to upload avatar');
+        return;
+      }
+
+      const payload: ProfileUpdateInput = {
+        ...rest,
+        avatar: uploadedFile ?? undefined,
+      };
+
+      update.mutate(payload, {
+        onSuccess: () => {
+          if (hasNewAvatar && previousAvatarPath) {
+            removeAvatar.mutate(previousAvatarPath);
+          }
+        },
+        onError: () => {
+          if (hasNewAvatar && uploadedFile?.path) {
+            removeAvatar.mutate(uploadedFile.path);
+          }
+          toast.error('Failed to update profile');
+        },
+      });
+    },
+    [uploadAvatar, update, removeAvatar, userAvatarPath],
+  );
+
+  React.useEffect(() => {
+    if (avatar) {
+      const fileReader = new FileReader();
+      fileReader.onload = () => {
+        setPreview(fileReader.result as string);
+      };
+      fileReader.readAsDataURL(avatar);
+      return () => fileReader.abort();
+    }
+
+    setPreview(userAvatarPath);
+  }, [avatar, userAvatarPath]);
+
+  const isSubmitting = update.isPending || uploadAvatar.isPending;
 
   return (
     <Box
@@ -121,27 +194,21 @@ export const ProfileForm = () => {
                   variant="contained"
                   component="label"
                   fullWidth
-                  loading={upload.isPending}
+                  disabled={isSubmitting}
                 >
-                  Upload new avatar
+                  Choose new avatar
                   <input
                     type="file"
                     accept="image/*"
                     hidden
-                    onChange={(e) => {
-                      const fileList = e.target.files;
-                      if (!fileList || fileList.length === 0) return;
-
-                      const file = fileList[0];
-
-                      const formData = new FormData();
-                      formData.append(`file`, file);
-                      upload.mutate(formData);
-                    }}
+                    onChange={handleAvatarChange}
                   />
                 </Button>
               )}
             />
+            {errors.avatar && (
+              <FormHelperText error>{errors.avatar.message}</FormHelperText>
+            )}
           </Paper>
         </Grid>
 
@@ -242,17 +309,16 @@ export const ProfileForm = () => {
               {/* Submit */}
               <Box sx={{ mt: 2 }}>
                 <Button
-                  ref={submitButton}
                   type="submit"
                   variant="contained"
                   fullWidth
-                  loading={update.isPending}
+                  disabled={isSubmitting}
                   sx={{
                     textTransform: 'none',
                     py: 1.2,
                   }}
                 >
-                  Save changes
+                  {isSubmitting ? 'Saving...' : 'Save changes'}
                 </Button>
               </Box>
             </Box>

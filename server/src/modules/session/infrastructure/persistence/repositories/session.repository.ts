@@ -27,6 +27,13 @@ export class SessionDocumentRepository implements SessionRepository {
     return SessionMapper.toDomain(sessionObject);
   }
 
+  async findByUserId(conditions: {
+    userId: User['id'];
+  }): Promise<NullableType<Session>> {
+    const { userId } = conditions;
+    return await this.sessionModel.findOne({ user: userId.toString() });
+  }
+
   async update(
     id: Session['id'],
     payload: Partial<Session>,
